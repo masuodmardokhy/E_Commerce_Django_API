@@ -1,3 +1,6 @@
 from django.db import models
+from base.models import *
 
-# Create your models here.
+
+class Wish_List(BaseModel):
+    name = models.CharField(max_length=30)

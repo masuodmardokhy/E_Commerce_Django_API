@@ -1,17 +1,13 @@
 from django.db import models
 from django.utils.timezone import datetime
+from base.models import *
 
 
-class BaseModel(models.Model):
-    name = models.CharField(max_length=50)
-    create = models.DateTimeField(auto_now_add=True)
-    update = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        abstract = True
 
 
-class Category(BaseModel.Model):
+
+class Category(BaseModel):
+    name = models.CharField(max_length=50 )
     slug = models.SlugField(allow_unicode=True, unique=True, null=True, blank=True)
     image = models.ImageField(upload_to='gallery/category')
 

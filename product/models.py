@@ -1,11 +1,13 @@
 from django.db import models
 from django.utils.timezone import datetime
-from category .models import *
+# from category .models import *
+from base.models import *
 
 
 
-class Product(BaseModel.Model):
-    category = models.ForeignKey(Category, on_delete=models.CASCADE )
+class Product(BaseModel):
+    #category = models.ForeignKey(Category, on_delete=models.CASCADE )
+    name = models.CharField(max_length=30)
     slug = models.SlugField(allow_unicode=True, unique=True, null=True, blank=True)
     amount = models.PositiveIntegerField()
     unit_price = models.PositiveIntegerField()
@@ -23,8 +25,8 @@ class Product(BaseModel.Model):
     # def products_by_id(id):
     #     return Product.objects.filter(category_id=id)
 
-
-    def show_total_price(self):         #we have this function to discount products.
+    @property
+    def total_price(self):         #we have this function to discount products.
         if not self.discount:           #If there is a discount, calculate it and show the result in the total_price
             return self.unit_price
         elif self.discount:

@@ -1,17 +1,13 @@
 from django.db import models
-from product.models import *
-from cart_item.models import *
+# from product .models import *
+# from cart_item .models import *
 from django.utils.timezone import datetime
+from base.models import *
 
 
-
-
-
-
-
-class Users(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE )
-    cart_list = models.ForeignKey(Cart_List, on_delete=models.CASCADE )
+class Users(BaseModel):
+    #product = models.ForeignKey(Product, on_delete=models.CASCADE )
+    #cart_list = models.ForeignKey(Cart_Item, on_delete=models.CASCADE )
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=40)
     email = models.EmailField()

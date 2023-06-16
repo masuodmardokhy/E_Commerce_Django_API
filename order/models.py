@@ -1,13 +1,14 @@
 from django.db import models
 from django.utils.timezone import datetime
-from product .models import *
-from shopping_cart .models import *
+from base.models import *
+# from product .models import *
+# from shopping_cart .models import *
 
 
 
 
-class Order(models.Model):
-    shopping_cart = models.OneToOneRel(Shapping_cart, on_delete=models.CASCADE)
+class Order(BaseModel):
+    #shopping_cart = models.OneToOneRel(Shopping_Cart, on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
     quantity = models.PositiveIntegerField(default=1)
     price = models.PositiveIntegerField()

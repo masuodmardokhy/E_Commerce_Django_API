@@ -23,14 +23,14 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('category/', include('category.urls')),
-    path('cart_item/', include('cart_item.urls')),
-    path('delivery/', include('delivery.urls')),
-    path('order/', include('order.urls')),
-    path('product/', include('product.urls')),
-    path('shopping_cart/', include('shopping_cart.urls')),
-    path('sub_categoty/', include('sub_category.urls')),
-    path('user/', include('users.urls')),
+    # path('category/', include('category.urls')),
+    # path('cart_item/', include('cart_item.urls')),
+    # path('delivery/', include('delivery.urls')),
+    # path('order/', include('order.urls')),
+    # path('product/', include('product.urls')),
+    # path('shopping_cart/', include('shopping_cart.urls')),
+    # path('sub_categoty/', include('sub_category.urls')),
+    # path('user/', include('users.urls')),
 
     path('api-token-auth/', views.obtain_auth_token) ,
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

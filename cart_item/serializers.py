@@ -3,5 +3,5 @@ from .models import *
 
 class Cart_ItemSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Product
+        model = Cart_Item
         fields = '__all__'
