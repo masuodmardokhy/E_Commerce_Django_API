@@ -3,15 +3,15 @@ from django.db import models
 # from cart_item .models import *
 from django.utils.timezone import datetime
 from base.models import *
+from django.core.validators import MinLengthValidator
+
 
 
 class Users(BaseModel):
-    #product = models.ForeignKey(Product, on_delete=models.CASCADE )
-    #cart_list = models.ForeignKey(Cart_Item, on_delete=models.CASCADE )
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=40)
     email = models.EmailField()
-    phone = models.CharField(max_length=11)
+    phone = models.CharField(max_length=15,  validators=[MinLengthValidator(11)])
     password = models.CharField(max_length=60)
 
     def register(self):
@@ -24,6 +24,7 @@ class Users(BaseModel):
         except:
             return False
 
+    @staticmethod
     def isExists(self):
         if Users.objects.filter(email=self.email):
             return True

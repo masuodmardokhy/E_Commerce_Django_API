@@ -1,10 +1,10 @@
 from django.db import models
 from base.models import *
-#from shopping_cart .models import *
+from shopping_cart .models import *
 
 
 class Delivery(BaseModel):
-    #shopping_cart = models.OneToOneRel(Shopping_Cart, on_delete=models.CASCADE )
+    shopping_cart = models.OneToOneField(Shopping_Cart, on_delete=models.CASCADE, default='')
     send_with_post = models.BooleanField(default=False)
     products_price = models.PositiveIntegerField()
     send_price = models.PositiveIntegerField()

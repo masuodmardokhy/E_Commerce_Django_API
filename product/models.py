@@ -1,12 +1,13 @@
 from django.db import models
 from django.utils.timezone import datetime
-# from category .models import *
 from base.models import *
-
+from users.models import *
+from sub_category.models import *
 
 
 class Product(BaseModel):
-    #category = models.ForeignKey(Category, on_delete=models.CASCADE )
+    users = models.ForeignKey(Users, on_delete=models.CASCADE, default=1)
+    sub_category = models.ForeignKey(Sub_Category, on_delete=models.CASCADE, default=1)
     name = models.CharField(max_length=30)
     slug = models.SlugField(allow_unicode=True, unique=True, null=True, blank=True)
     amount = models.PositiveIntegerField()
@@ -21,9 +22,9 @@ class Product(BaseModel):
         return self.name
 
 
-    # @staticmethod
-    # def products_by_id(id):
-    #     return Product.objects.filter(category_id=id)
+    @staticmethod
+    def products_by_id(id):
+        return Product.objects.filter(category_id=id)
 
     @property
     def total_price(self):         #we have this function to discount products.
