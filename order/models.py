@@ -21,3 +21,6 @@ class Order(BaseModel):
 
     def placeOrder(self):
         self.save()
+
+    def __str__(self):
+        return self.name

@@ -17,6 +17,9 @@ class Users(BaseModel):
     def register(self):
         self.save()
 
+    def __str__(self):
+        return self.last_name
+
     @staticmethod
     def user_by_email(getemail):
         try:

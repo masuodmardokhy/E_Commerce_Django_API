@@ -9,10 +9,34 @@ from .serializers import *
 class UserViewSet(viewsets.ViewSet):
     queryset = Users.objects.all()
     serializer_class = UserSerializer
+
+
+    # def filter(self,request):
+    #     user = Users.objects.filter(first_name=request)
+    #     serializer = UserSerializer(user,many=True)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+    # def filter(self, request, name ):  # for find recorde
+    #     try:
+    #         user = Users.objects.filter(first_name=name)
+    #         serializer = UserSerializer(user,many=True)
+    #
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     except Users.DoesNotExist:
+    #         return Response("user not found", status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
     def list(self,request):
-        user = Users.objects.all()
-        serializer = UserSerializer(user,many=True)
+        user1 = Users.objects.all()
+        serializer = UserSerializer(user1,many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 
     def create(self,request):
         serializer = UserSerializer(data=request.data)
@@ -21,13 +45,13 @@ class UserViewSet(viewsets.ViewSet):
             return Response(serializer.data , status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def retrieve(self, request, pk=None):  # for find recorde
-        try:
-            user = Users.objects.get(id=pk)
-            serializer = UserSerializer(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Users.DoesNotExist:
-            return Response("user not found", status=status.HTTP_404_NOT_FOUND)
+    # def retrieve(self, request, pk=None):  # for find recorde
+    #     try:
+    #         user = Users.objects.get(id=pk)
+    #         serializer = UserSerializer(user)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     except Users.DoesNotExist:
+    #         return Response("user not found", status=status.HTTP_404_NOT_FOUND)
 
 
     def update(self, request, pk=None):

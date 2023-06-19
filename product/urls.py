@@ -7,6 +7,8 @@ from .import views
 router = routers.DefaultRouter()        # url for class base view
 router.register('product_view_set',views.ProductViewSet, basename='product_view_set'),
 
+
+
 app_name = "product"
 urlpatterns = [
                 # url for function base view

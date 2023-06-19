@@ -16,7 +16,7 @@ class Product(BaseModel):
     total_price = models.PositiveIntegerField()
     available = models.BooleanField(default=True)
     description = models.CharField(max_length=300, blank=True, null=True)
-    image = models.ImageField(upload_to='gallery/product')
+    image = models.ImageField(upload_to='product_media', null= True)
 
     def __str__(self):
         return self.name
@@ -34,3 +34,10 @@ class Product(BaseModel):
             t = (self.unit_price * self.discount)/100
             return int(self.unit_price - t)
         return self.total_price
+
+
+    # @property
+    # def image_display(self):
+    #     if self.image:
+    #         return self.image.url
+    #     return None
