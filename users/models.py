@@ -1,9 +1,8 @@
 from django.db import models
-# from product .models import *
-# from cart_item .models import *
 from django.utils.timezone import datetime
 from base.models import *
 from django.core.validators import MinLengthValidator
+from rest_framework.authtoken.models import Token
 
 
 
