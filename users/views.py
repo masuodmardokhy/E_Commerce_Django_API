@@ -4,6 +4,9 @@ from rest_framework import status                      # for show messages
 from rest_framework import viewsets , permissions      # viewsets for class base view
 from .serializers import *
 from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate, login, logout
+from .models import Users
+
 
 
 
@@ -79,23 +82,44 @@ class UserViewSet(viewsets.ViewSet):
         email = request.data.get('email')
         password = request.data.get('password')
 
-        try:
-            user = Users.objects.get(email=email, password=password)
+        user = authenticate(request, email=email, password=password)
+        if user is not None:
+            login(request, user)
             serializer = UserSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except Users.DoesNotExist:
+        else:
             return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
-
-
 
     @action(detail=False, methods=['post'])
     def user_sign_out(self, request):
-        auth_token = request.META.get('HTTP_AUTHORIZATION')   # get token in header
-        if auth_token:
-            Token.objects.filter(key=auth_token).delete()    # clear token as system
-            return Response("User signed out", status=status.HTTP_200_OK)
-        else:
-            return Response("Authentication token not provided", status=status.HTTP_400_BAD_REQUEST)
+        logout(request)
+        return Response("User signed out", status=status.HTTP_200_OK)
+
+
+
+
+    # @action(detail=False, methods=['post'])
+    # def user_sign_in(self, request):
+    #     email = request.data.get('email')
+    #     password = request.data.get('password')
+    #
+    #     try:
+    #         user = Users.objects.get(email=email, password=password)
+    #         serializer = UserSerializer(user)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     except Users.DoesNotExist:
+    #         return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
+    #
+    #
+    #
+    # @action(detail=False, methods=['post'])
+    # def user_sign_out(self, request):
+    #     auth_token = request.META.get('HTTP_AUTHORIZATION')   # get token in header
+    #     if auth_token:
+    #         Token.objects.filter(key=auth_token).delete()    # clear token as system
+    #         return Response("User signed out", status=status.HTTP_200_OK)
+    #     else:
+    #         return Response("Authentication token not provided", status=status.HTTP_400_BAD_REQUEST)
 
 
 
