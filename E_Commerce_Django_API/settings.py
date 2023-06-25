@@ -38,15 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'cart_item',
-    'category',
-    'delivery',
-    'order',
-    'product',
-    'shopping_cart',
-    'sub_category',
-    'users',
-    'base',
+    'core',
 
     'rest_framework',
     'rest_framework.authtoken',

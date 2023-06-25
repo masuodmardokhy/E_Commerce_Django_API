@@ -20,20 +20,23 @@ from rest_framework.authtoken import views
 from rest_framework.authtoken.views import obtain_auth_token
 from django.conf import settings
 from django.conf.urls.static import static
+# from core import admin
+from core.admin import *
 
 
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('category/', include('category.urls')),
-    path('cart_item/', include('cart_item.urls')),
-    # path('delivery/', include('delivery.urls')),
-    path('order/', include('order.urls')),
-    path('product/', include('product.urls')),
-    path('shopping_cart/', include('shopping_cart.urls')),
-    path('sub_category/', include('sub_category.urls')),
-    path('users/', include('users.urls')),
+    path('category/', include('core.urls.category')),
+    path('cart_item/', include('core.urls.cart_item')),
+    path('delivery/', include('core.urls.delivery')),
+    path('order/', include('core.urls.order')),
+    path('product/', include('core.urls.product')),
+    path('shopping_cart/', include('core.urls.shopping_cart')),
+    path('sub_category/', include('core.urls.sub_category')),
+    path('users/', include('core.urls.users')),
+    path('wish_list/', include('core.urls.wish_list')),
 
     path('api-token-auth/', views.obtain_auth_token) ,
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
