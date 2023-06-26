@@ -1,9 +1,10 @@
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import action
 from rest_framework import status                      # for show messages
 from rest_framework import viewsets , permissions      # viewsets for class base view
-from core.models.category import *                     # * it means all
-from core.serializers.category import *
+from core.models.category import *
+from core.serializers.category import *                # * it means all
+from django.db.models import Min, Max
 
 
 
@@ -11,36 +12,125 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
 
-    def list(self, request):
-        category = self.get_queryset()
-        serializer = self.get_serializer(category, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def retrieve(self, request, pk=None):
-        category = self.get_object()
-        serializer = self.get_serializer(category)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def update(self, request, pk=None):
-        category = self.get_object()
-        serializer = self.get_serializer(category, data=request.data, partial=True)  # partial = True, This means that only the part of the data that needs to be updated
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def destroy(self, request, pk=None):
+    @action(detail=True, methods=['get'])
+    def filter_category_by_name(self, request, name=None):
         try:
-            category = self.get_object()
-            category.delete()
-            return Response("Deleted category                                                                                                                                                          with ID: {pk}", status=status.HTTP_204_NO_CONTENT)
+            cat = Category.objects.filter(name=name)
+            serializer = CategorySerializer(cat, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         except Category.DoesNotExist:
-            return Response("Product not found", status=status.HTTP_404_NOT_FOUND)
+            return Response("category not found", status=status.HTTP_404_NOT_FOUND)
 
+
+    @action(detail=True, methods=['get'])
+    def filter_category_by_id(self, request, pk=None):
+        try:
+            cat = Category.objects.get(id=pk)
+            serializer = CategorySerializer(cat)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Category.DoesNotExist:
+            return Response("category not found", status=status.HTTP_404_NOT_FOUND)
+
+
+    @action(detail=False, methods=['get'])
+    def filter_category_by_date(self, request):
+        start_date = request.query_params.get('start_date')
+        end_date = request.query_params.get('end_date')
+        categories = self.get_queryset().filter(date__range=[start_date, end_date])
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['get'])
+    def filter_category_first_created(self, request):   # aggregate is a method for operation sum,count,avg, min,max
+        earliest_created = self.get_queryset().aggregate(earliest_created=Min('create')).get('earliest_created')
+        categories = self.get_queryset().filter(create=earliest_created)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['get'])
+    def filter_category_last_created(self, request):
+        latest_created = self.get_queryset().aggregate(latest_created=Max('create')).get('latest_created')
+        categories = self.get_queryset().filter(create=latest_created).order_by('create')
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['get'])
+    def filter_category_last_to_first_created(self, request):
+        categories = self.get_queryset().order_by('-create')
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['get'])
+    def filter_category_first_to_last_created(self, request):
+        categories = self.get_queryset().order_by('create')
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    @action(detail=False, methods=['get'])
+    def search_category_by_name(self, request, search_param):
+        categories = self.get_queryset().filter(name__icontains=search_param)
+        serializer = self.get_serializer(categories, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+    # in the class view set make list,create,retrive,destroy, update,partial update automatic
+    # and dont have need we make that
+
+
+    # # @action(detail=False, methods=['get'])
+    # def list(self, request):
+    #     category = self.get_queryset()
+    #     serializer = self.get_serializer(category, many=True)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    #
+    #
+    # # @action(detail=False, methods=['post'])
+    # def create(self, request):
+    #     serializer = CategorySerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #
+    #
+    # # @action(detail=True, methods=['put'])
+    # def retrieve(self, request, pk=None):
+    #     # try:
+    #     #     cat = Category.objects.get(id=pk)
+    #     #     serializer = CategorySerializer(cat, data=request.data)
+    #     #     if serializer.is_valid():
+    #     #         serializer.save()
+    #     #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     # except Category.DoesNotExist:
+    #     #     return Response("this category not found", status=status.HTTP_404_NOT_FOUND)
+    #     order = self.get_object()
+    #     serializer = self.get_serializer(order, data=request.data, partial=True)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    #
+    #
+    #
+    #
+    # # @action(detail=True, methods=['delete'])
+    # def destroy(self, request, pk=None):
+    #     try:
+    #         cat = Category.objects.get(id=pk)
+    #         cat.delete()
+    #         return Response("category deleted", status=status.HTTP_204_NO_CONTENT)
+    #     except Category.DoesNotExist:
+    #         return Response("category not found", status=status.HTTP_404_NOT_FOUND)

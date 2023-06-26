@@ -11,48 +11,9 @@ from core.serializers.users import *
 
 
 # WE USE VIEWSETS AND AT THE END OF THESE CODES  , WE CREATED THIS CLASS USING APIVIEW AND COMMENTED IT.
-class UserViewSet(viewsets.ViewSet):
+class UserViewSet(viewsets.ModelViewSet):
     queryset = Users.objects.all()
     serializer_class = UserSerializer
-
-
-    @action(detail=False, methods=['get'])
-    def list_user(self,request):
-        user1 = Users.objects.all()
-        serializer = UserSerializer(user1,many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-    @action(detail=False, methods=['post'])
-    def create_user(self,request):
-            serializer = UserSerializer(data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data , status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-    @action(detail=True, methods=['put'])
-    def update_user(self, request, pk=None):
-        try:
-            user = Users.objects.get(id=pk)
-            serializer = UserSerializer(user, data=request.data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except Users.DoesNotExist:
-            return Response("user not found", status=status.HTTP_404_NOT_FOUND)
-
-
-    @action(detail=True, methods=['delete'])
-    def destroy_user(self, request, pk=None):    # for delete recorde
-        try:
-            user = Users.objects.get(id=pk)
-            user.delete()
-            return Response("user deleted", status=status.HTTP_204_NO_CONTENT)
-        except Users.DoesNotExist:
-            return Response("user not found", status=status.HTTP_404_NOT_FOUND)
 
 
     @action(detail=True, methods=['get'])
@@ -94,6 +55,51 @@ class UserViewSet(viewsets.ViewSet):
     def user_sign_out(self, request):
         logout(request)
         return Response("User signed out", status=status.HTTP_200_OK)
+
+
+
+
+
+    #
+    # @action(detail=False, methods=['get'])
+    # def list_user(self,request):
+    #     user1 = Users.objects.all()
+    #     serializer = UserSerializer(user1,many=True)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    #
+    #
+    # @action(detail=False, methods=['post'])
+    # def create_user(self,request):
+    #         serializer = UserSerializer(data=request.data)
+    #         if serializer.is_valid():
+    #             serializer.save()
+    #             return Response(serializer.data , status=status.HTTP_201_CREATED)
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #
+    #
+    # @action(detail=True, methods=['put'])
+    # def update_user(self, request, pk=None):
+    #     try:
+    #         user = Users.objects.get(id=pk)
+    #         serializer = UserSerializer(user, data=request.data)
+    #         if serializer.is_valid():
+    #             serializer.save()
+    #             return Response(serializer.data, status=status.HTTP_200_OK)
+    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #     except Users.DoesNotExist:
+    #         return Response("user not found", status=status.HTTP_404_NOT_FOUND)
+    #
+    #
+    # @action(detail=True, methods=['delete'])
+    # def destroy_user(self, request, pk=None):    # for delete recorde
+    #     try:
+    #         user = Users.objects.get(id=pk)
+    #         user.delete()
+    #         return Response("user deleted", status=status.HTTP_204_NO_CONTENT)
+    #     except Users.DoesNotExist:
+    #         return Response("user not found", status=status.HTTP_404_NOT_FOUND)
+
+
 
 
 
