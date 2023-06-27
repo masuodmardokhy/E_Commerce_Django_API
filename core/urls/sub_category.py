@@ -17,7 +17,7 @@ urlpatterns = [       # url for function base view
     path('filter/id/<int:pk>/', Sub_CategoryViewSet.as_view({'get': 'filter_sub_category_by_id'}),
          name='filter_sub_category_by_id'),  # filter sub_category by id API
 
-    # path('filter/date/', CategoryViewSet.as_view({'get': 'filter_sub_category_by_date'}),
+    # path('filter/date/', Sub_CategoryViewSet.as_view({'get': 'filter_sub_category_by_date'}),
     # name='filter_category_by_date'),       #  filter category by data API
 
     path('filter/first-created/', Sub_CategoryViewSet.as_view({'get': 'filter_sub_category_first_created'}),
@@ -34,6 +34,9 @@ urlpatterns = [       # url for function base view
 
     path('search/<str:search_param>', Sub_CategoryViewSet.as_view({'get': 'search_sub_category_by_name'}),
          name='search_sub_category_by_name'),  # search sub_category by name API
+
+    path('sort/', Sub_CategoryViewSet.as_view({'get': 'sort_sub_categories'}),
+         name='sort_sub_categories'),  # search sub_category by name API
 
 ]
 urlpatterns += router.urls

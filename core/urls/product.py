@@ -9,14 +9,30 @@ router.register(r'', ProductViewSet, basename='user_view_set' )
 
 
 urlpatterns = [   # url for function base view
-   # path('', include(router.urls)),
-   # path('list/', ProductViewSet.as_view({'get': 'list_product'}), name='list_product'),  # list product API
-   # path('create/', ProductViewSet.as_view({'get': 'create_product'}), name='create_product'),   # create product(sign up) API
-   # path('update/id/<int:pk>/',ProductViewSet.as_view({'get': 'update_product'}), name='update_product'),  # update product API
-   # path('delete/id/<int:pk>/',ProductViewSet.as_view({'get': 'delete_product'}), name='delete_product'),  # delete product API
-   path('filter/name/<str:name>/', ProductViewSet.as_view({'get': 'filter_product_by_name'}), name='filter_product_by_name'),  # filter product by name API
-   path('filter/min-price/', ProductViewSet.as_view({'get': 'filter_product_min_total_price'}),name='filter_product_min_total_price'),  # filter product by min total price API
-   path('filter/max-price/', ProductViewSet.as_view({'get': 'filter_product_max_total_price'}),name='filter_product_max_total_price'),  # filter product max total price API
+   path('', include(router.urls)),
+
+   path('filter/name/<str:name>/', ProductViewSet.as_view({'get': 'filter_product_by_name'}),
+        name='filter_product_by_name'),  # filter product by name API
+
+   path('filter/id/<int:pk>/', ProductViewSet.as_view({'get': 'filter_product_by_id'}),
+        name='filter_product_by_id'),  # filter product
+   path('filter/first-created/', ProductViewSet.as_view({'get': 'filter_product_first_created'}),
+        name='filter_product_first_created'),  # filter product first created API
+
+   path('filter/last-created/', ProductViewSet.as_view({'get': 'filter_product_last_created'}),
+        name='filter_product_last_created'),  # filter product last created API
+
+   path('filter/lastToFirst-created/',ProductViewSet.as_view({'get': 'filter_product_last_to_first_created'}),
+        name='filter_product_last_to_first_created'),  # filter product last to first created API
+
+   path('filter/firstToLast-created/',ProductViewSet.as_view({'get': 'filter_product_first_to_last_created'}),
+        name='filter_product_first_to_last_created'),  # filter product last to first created API
+
+   path('search/<str:search_param>', ProductViewSet.as_view({'get': 'search_product_by_name'}),
+        name='search_product_by_name'),  # search product by name API
+
+   path('sort/', ProductViewSet.as_view({'get': 'sort_suproduct'}),
+        name='sort_suproduct'),  # search product by name API
 
 ]
 
