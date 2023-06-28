@@ -11,6 +11,8 @@ router.register(r'', Sub_CategoryViewSet, basename='sub_category_view_set'),
 urlpatterns = [       # url for function base view
     path('', include(router.urls)),
 
+    path('', Sub_CategoryViewSet.as_view({'get': 'list'}), name='sub_category-list'),  # list filtering sort by and pagination
+
     path('filter/name/<str:name>/', Sub_CategoryViewSet.as_view({'get': 'filter_sub_category_by_name'}),
          name='filter_sub_category_by_name'),  # filter sub_category by name API
 

@@ -9,17 +9,50 @@ from django.db.models import Min, Max
 
 
 
-
 class MyPagination(PageNumberPagination):
     page_size = 3
     page_size_query_param = 'page_size'
-    max_page_size = 16
+    max_page_size = 10
+
 
 
 class Sub_CategoryViewSet(viewsets.ModelViewSet):
     queryset = Sub_Category.objects.all()
     serializer_class = Sub_CategorySerializer
     pagination_class = MyPagination
+
+
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        # name filtering
+        name = request.query_params.get('name')
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+
+        # price filtering
+        price = request.query_params.get('price')
+        if price:
+            queryset = queryset.filter(price=price)
+
+        # sort by name , date , price_lowest , price_highest
+        sort_by = request.query_params.get('sort_by')
+        if sort_by == 'name':
+            queryset = queryset.order_by('name')
+        elif sort_by == 'date':
+            queryset = queryset.order_by('create')
+        elif sort_by == 'price_lowest':
+            queryset = queryset.order_by('price')
+        elif sort_by == 'price_highest':
+            queryset = queryset.order_by('-price')
+
+        # paginations
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+        serializer = self.get_serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
 
 
 
@@ -90,19 +123,3 @@ class Sub_CategoryViewSet(viewsets.ModelViewSet):
 
     from django.db.models import F
 
-    @action(detail=False, methods=['get'])
-    def sort_sub_categories(self, request):
-        sort_by = request.query_params.get('sort_by')
-        if sort_by == 'name':
-            categories = self.get_queryset().order_by('name')
-        elif sort_by == 'date':
-            categories = self.get_queryset().order_by('create')
-        elif sort_by == 'price_lowest':
-            categories = self.get_queryset().order_by('price')
-        elif sort_by == 'price_highest':
-            categories = self.get_queryset().order_by('-price')
-        else:
-            return Response("Invalid sort_by parameter.", status=status.HTTP_400_BAD_REQUEST)
-
-        serializer = self.get_serializer(categories, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)

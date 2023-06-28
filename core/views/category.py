@@ -1,5 +1,6 @@
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework import status                      # for show messages
 from rest_framework import viewsets , permissions      # viewsets for class base view
 from core.models.category import *
@@ -8,9 +9,46 @@ from django.db.models import Min, Max
 
 
 
+
+class MyPagination(PageNumberPagination):
+    page_size = 3
+    page_size_query_param = 'page_size'
+    max_page_size = 10
+
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+
+
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        # name filtering
+        name = request.query_params.get('name')
+        if name:
+            queryset = queryset.filter(name__icontains=name)
+
+        # price filtering
+        price = request.query_params.get('price')
+        if price:
+            queryset = queryset.filter(price=price)
+
+        # sort by name , date , price_lowest , price_highest
+        sort_by = request.query_params.get('sort_by')
+        if sort_by == 'name':
+            queryset = queryset.order_by('name')
+        elif sort_by == 'date':
+            queryset = queryset.order_by('create')
+
+        # paginations
+        paginator = self.pagination_class()
+        page = paginator.paginate_queryset(queryset, request)
+        serializer = self.get_serializer(page, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+
 
 
     @action(detail=True, methods=['get'])
