@@ -6,51 +6,63 @@ from rest_framework import viewsets , permissions      # viewsets for class base
 from core.models.product import *
 from core.serializers.product import *                # * it means all
 from django.db.models import Min, Max
+from django import forms
 
+
+
+class SortForm(forms.Form):
+    CHOICES = [
+        ('name', 'نام'),
+        ('lowest_price', 'کمترین قیمت'),
+        ('highest_price', 'بیشترین قیمت'),
+    ]
+    sort_by = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect)
 
 
 
 class MyPagination(PageNumberPagination):
-    page_size = 3
-    page_size_query_param = 'page_size'
+    page_size_query_param = 'size'
     max_page_size = 10
-
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     pagination_class = MyPagination
 
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
 
-        # name filtering
+    def list(self, request, *args, **kwargs):
+        # Create and handle the form
+        form = SortForm(request.GET)
+        if form.is_valid():
+            sort_by = form.cleaned_data['sort_by']
+            queryset = Product.objects.all()
+            if sort_by == 'name':
+                queryset = queryset.order_by('name')
+            elif sort_by == 'lowest_price':
+                queryset = queryset.order_by('price')
+            elif sort_by == 'highest_price':
+                queryset = queryset.order_by('-price')
+            else:
+                # Handle invalid sort option
+                return Response({'error': 'Invalid sort option'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            # Handle form validation errors
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Apply additional filters
         name = request.query_params.get('name')
         if name:
             queryset = queryset.filter(name__icontains=name)
 
-        # price filtering
         price = request.query_params.get('price')
         if price:
             queryset = queryset.filter(price=price)
 
-        # sort by name , date , price_lowest , price_highest
-        sort_by = request.query_params.get('sort_by')
-        if sort_by == 'name':
-            queryset = queryset.order_by('name')
-        elif sort_by == 'date':
-            queryset = queryset.order_by('create')
-        elif sort_by == 'price_lowest':
-            queryset = queryset.order_by('price')
-        elif sort_by == 'price_highest':
-            queryset = queryset.order_by('-price')
-
-        # paginations
+        # Perform pagination
         paginator = self.pagination_class()
         page = paginator.paginate_queryset(queryset, request)
         serializer = self.get_serializer(page, many=True)
         return paginator.get_paginated_response(serializer.data)
-
 
 
 
