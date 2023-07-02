@@ -10,6 +10,9 @@ from django import forms
 
 
 
+
+
+
 class SortForm(forms.Form):
     CHOICES = [
         ('name', 'نام'),
@@ -20,52 +23,132 @@ class SortForm(forms.Form):
 
 
 
-class MyPagination(PageNumberPagination):
-    page_size_query_param = 'size'
-    max_page_size = 10
-
-class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
+class ProductViewSet(viewsets.ViewSet):
     serializer_class = ProductSerializer
-    pagination_class = MyPagination
 
-
-    def list(self, request, *args, **kwargs):
-        # Create and handle the form
-        form = SortForm(request.GET)
-        if form.is_valid():
-            sort_by = form.cleaned_data['sort_by']
-            queryset = Product.objects.all()
-            if sort_by == 'name':
-                queryset = queryset.order_by('name')
-            elif sort_by == 'lowest_price':
-                queryset = queryset.order_by('price')
-            elif sort_by == 'highest_price':
-                queryset = queryset.order_by('-price')
-            else:
-                # Handle invalid sort option
-                return Response({'error': 'Invalid sort option'}, status=status.HTTP_400_BAD_REQUEST)
-        else:
-            # Handle form validation errors
-            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
-
-        # Apply additional filters
+    def list(self, request):
+        # Get query parameters from the request
         name = request.query_params.get('name')
+        min_price = request.query_params.get('min_price')
+        max_price = request.query_params.get('max_price')
+
+        # Filter queryset based on provided parameters
+        queryset = Product.objects.all()
         if name:
             queryset = queryset.filter(name__icontains=name)
+        if min_price:
+            queryset = queryset.filter(unit_price__gte=min_price)
+        if max_price:
+            queryset = queryset.filter(unit_price__lte=max_price)
 
-        price = request.query_params.get('price')
-        if price:
-            queryset = queryset.filter(price=price)
+        # Sort queryset based on parameters
+        sort_by = request.query_params.get('sort_by')
+        if sort_by == 'name':
+            queryset = queryset.order_by('name')
+        elif sort_by == 'min_price':
+            queryset = queryset.order_by('unit_price')
+        elif sort_by == 'max_price':
+            queryset = queryset.order_by('-unit_price')
 
-        # Perform pagination
-        paginator = self.pagination_class()
-        page = paginator.paginate_queryset(queryset, request)
-        serializer = self.get_serializer(page, many=True)
-        return paginator.get_paginated_response(serializer.data)
+        # Serialize queryset and return response
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
 
 
 
+
+
+#
+#
+# class MyPagination(PageNumberPagination):
+#     page_size_query_param = 'size'
+#     max_page_size = 10
+#
+#
+#
+# class ProductViewSet(viewsets.ModelViewSet):
+#     queryset = Product.objects.all()
+#     serializer_class = ProductSerializer
+#     pagination_class = MyPagination
+#
+#
+#
+#
+#     @action(detail=True, methods=['post'])
+#     def list_filter_sort(self, request, *args, **kwargs):
+#         # Create and handle the form
+#         form = SortForm(request.GET)
+#         if form.is_valid():
+#             sort_by = form.cleaned_data['sort_by']
+#             queryset = Product.objects.all()
+#             if sort_by == 'name':
+#                 queryset = queryset.order_by('name')
+#             elif sort_by == 'lowest_price':
+#                 queryset = queryset.order_by('price')
+#             elif sort_by == 'highest_price':
+#                 queryset = queryset.order_by('-price')
+#             else:
+#                 # Handle invalid sort option
+#                 return Response({'error': 'Invalid sort option'}, status=status.HTTP_400_BAD_REQUEST)
+#         else:
+#             # Handle form validation errors
+#             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+#
+#         # Apply additional filters
+#         name = request.query_params.get('name')
+#         if name:
+#             queryset = queryset.filter(name__icontains=name)
+#
+#         price = request.query_params.get('price')
+#         if price:
+#             queryset = queryset.filter(price=price)
+#
+#         # Perform pagination
+#         paginator = self.pagination_class()
+#         page = paginator.paginate_queryset(queryset, request)
+#         serializer = self.get_serializer(page, many=True)
+#         return paginator.get_paginated_response(serializer.data)
+#
+#
+#
+
+
+    # def list(self, request, *args, **kwargs):
+    #     # Create and handle the form
+    #     form = SortForm(request.GET)
+    #     if form.is_valid():
+    #         sort_by = form.cleaned_data['sort_by']
+    #         queryset = Product.objects.all()
+    #         if sort_by == 'name':
+    #             queryset = queryset.order_by('name')
+    #         elif sort_by == 'lowest_price':
+    #             queryset = queryset.order_by('price')
+    #         elif sort_by == 'highest_price':
+    #             queryset = queryset.order_by('-price')
+    #         else:
+    #             # Handle invalid sort option
+    #             return Response({'error': 'Invalid sort option'}, status=status.HTTP_400_BAD_REQUEST)
+    #     else:
+    #         # Handle form validation errors
+    #         return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+    #
+    #     # Apply additional filters
+    #     name = request.query_params.get('name')
+    #     if name:
+    #         queryset = queryset.filter(name__icontains=name)
+    #
+    #     price = request.query_params.get('price')
+    #     if price:
+    #         queryset = queryset.filter(price=price)
+    #
+    #     # Perform pagination
+    #     paginator = self.pagination_class()
+    #     page = paginator.paginate_queryset(queryset, request)
+    #     serializer = self.get_serializer(page, many=True)
+    #     return paginator.get_paginated_response(serializer.data)
+    #
+    #
+    #
 
 
     @action(detail=True, methods=['get'])

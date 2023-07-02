@@ -11,7 +11,7 @@ router.register(r'', ProductViewSet, basename='user_view_set' )
 urlpatterns = [   # url for function base view
    path('', include(router.urls)),
 
-    path('', ProductViewSet.as_view({'get': 'list'}), name='product-list'), # list filtering sort by and pagination
+    path('a', ProductViewSet.as_view({'get': 'list'}), name='product-list'), # list filtering sort by and pagination
 
 
     path('filter/name/<str:name>/', ProductViewSet.as_view({'get': 'filter_product_by_name'}),
