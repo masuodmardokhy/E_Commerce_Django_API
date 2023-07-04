@@ -11,5 +11,7 @@ router.register('order_view_set',OrderViewSet),
 app_name = "order"
 urlpatterns = [
                 # url for function base view
+    path('cancel', OrderViewSet.as_view({'get': 'cancel_order'}), name='cancel_order')  # cancel order
+
 ]
 urlpatterns += router.urls

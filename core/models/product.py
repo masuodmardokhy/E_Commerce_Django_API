@@ -7,7 +7,6 @@ from core.models.sub_category import *
 
 
 
-
 class Product(BaseModel):
     users = models.ForeignKey(Users, on_delete=models.CASCADE, default=1)
     sub_category = models.ForeignKey(Sub_Category, on_delete=models.CASCADE, default=1)
@@ -44,3 +43,7 @@ class Product(BaseModel):
     #     if self.image:
     #         return self.image.url
     #     return None
+
+
+
+
