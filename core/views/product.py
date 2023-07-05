@@ -5,43 +5,112 @@ from rest_framework import status                      # for show messages
 from rest_framework import viewsets , permissions      # viewsets for class base view
 from core.models.product import *
 from core.serializers.product import *                # * it means all
-from core.forms.sort_filter import *
+from core.models.shopping_cart import *
+from core.models.cart_item import *
 from django.db.models import Min, Max
 from django import forms
 from rest_framework.views import APIView
+from rest_framework.filters import SearchFilter
+from rest_framework.pagination import PageNumberPagination
+from rest_framework import filters
+
 
 
 class MyPagination(PageNumberPagination):
     page_size_query_param = 'size'
-    max_page_size = 10
+    max_page_size = 8
+
 
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
     pagination_class = MyPagination
+    filter_backends = [SearchFilter, filters.OrderingFilter]
+    ordering_fields = ['name', 'create', 'total_price']  # The fields you want to enable ordering on
+    search_fields = ['name', 'total_price']  # The fields you want the search feature to be active on
 
 
-class SortFilterViewSet(APIView):
-    def get(self, request):
-        form = Sort_FilterForm(request.GET)
-        if form.is_valid():
-            sort_by = form.cleaned_data['sort_by']
-            queryset = Product.objects.all()
-            if sort_by == 'name':
-                queryset = queryset.order_by('name')
-            elif sort_by == 'lowest_price':
-                queryset = queryset.order_by('price')
-            elif sort_by == 'highest_price':
-                queryset = queryset.order_by('-price')
-            else:
-                return Response({'error': 'Invalid sort option'}, status=status.HTTP_400_BAD_REQUEST)
+    def list(self, request):
+        queryset = self.filter_queryset(self.get_queryset())
 
-            serializer = ProductSerializer(queryset, many=True)
-            return Response(serializer.data)
+        # Apply ordering if requested
+        product = request.query_params.get('ordering')
+        if product in self.ordering_fields:
+            queryset = queryset.order_by(product)
 
-        return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
-    # @action(detail=False, methods=['get'])
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+
+    def retrieve(self, request, pk=None):
+        product = self.get_object()
+        serializer = self.get_serializer(product)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    def create(self, request):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def update(self, request, pk=None):
+        product = self.get_object()
+        serializer = self.get_serializer(product, data=request.data,
+                                         partial=True)  # partial = True, This means that only the part of the data that needs to be updated
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def partial_update(self, request, pk=None):
+        product = self.get_object()
+        serializer = self.get_serializer(product, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def destroy(self, request, pk=None):
+        try:
+            product = self.get_object()
+            product.delete()
+            return Response("Deleted product with ID: {pk}", status=status.HTTP_204_NO_CONTENT)
+        except Product.DoesNotExist:
+            return Response("product not found", status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=True, methods=['post'])
+    def add_to_cart(self, request, pk=None):
+        user = request.user
+        product = self.get_object()
+        amount = request.data.get('amount')
+
+        # Check if the user has a shopping cart
+        try:
+            shopping_cart = user.shopping_cart
+        except Shopping_Cart.DoesNotExist:
+            # Create a new shopping cart for the user if it doesn't exist
+            shopping_cart = Shopping_Cart.objects.create(user=user)
+
+        # Create a new cart item for the product
+        cart_item = Cart_Item.objects.create(users=user, product=product, shopping_cart=shopping_cart, amount=amount)
+
+        return Response("Added to cart successfully", status=status.HTTP_200_OK)
+
+
+
+
+
+# @action(detail=False, methods=['get'])
     # def sort_filter_form(self, request):
     #     form = Sort_FilterForm()
     #     return Response({'form': form.as_ul()})

@@ -6,7 +6,7 @@ from core.views.shopping_cart import *
 
 
 router = routers.DefaultRouter()        # url for class base view
-router.register('shopping_cart_viewset',Shopping_CartViewSet),
+router.register('',Shopping_CartViewSet),
 
 app_name = "shopping_cart"
 urlpatterns = [
