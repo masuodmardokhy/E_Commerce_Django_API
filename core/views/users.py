@@ -1,60 +1,71 @@
+from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework.decorators import action
-from rest_framework import status                      # for show messages
-from rest_framework import viewsets , permissions      # viewsets for class base view
-from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate, login, logout
-from core.models.users import *                     # * it means all
+from core.models.users import Users
 from core.serializers.users import *
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.contrib.auth import authenticate
+from rest_framework.permissions import IsAuthenticated
 
 
 
 
-# WE USE VIEWSETS AND AT THE END OF THESE CODES  , WE CREATED THIS CLASS USING APIVIEW AND COMMENTED IT.
-class UserViewSet(viewsets.ModelViewSet):
+class UsersViewSet(viewsets.ModelViewSet):
     queryset = Users.objects.all()
     serializer_class = UserSerializer
 
-
-    @action(detail=True, methods=['get'])
-    def filter_user_by_name(self, request, name=None):
-        try:
-            users = Users.objects.filter(first_name=name)
-            serializer = UserSerializer(users, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Users.DoesNotExist:
-            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
-
-
-    @action(detail=True, methods=['get'])
-    def filter_user_by_id(self, request, pk=None):
-        try:
-            user = Users.objects.get(id=pk)
-            serializer = UserSerializer(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Users.DoesNotExist:
-            return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
 
-    @action(detail=False, methods=['post'])
-    def user_sign_in(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        user = authenticate(request, email=email, password=password)
-        if user is not None:
-            login(request, user)
-            serializer = UserSerializer(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
 
 
-    @action(detail=False, methods=['post'])
-    def user_sign_out(self, request):
-        logout(request)
-        return Response("User signed out", status=status.HTTP_200_OK)
+
+    #
+    # @action(detail=True, methods=['get'])
+    # def filter_user_by_name(self, request, name=None):
+    #     try:
+    #         users = Users.objects.filter(first_name=name)
+    #         serializer = UserSerializer(users, many=True)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     except Users.DoesNotExist:
+    #         return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+    #
+    #
+    # @action(detail=True, methods=['get'])
+    # def filter_user_by_id(self, request, pk=None):
+    #     try:
+    #         user = Users.objects.get(id=pk)
+    #         serializer = UserSerializer(user)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     except Users.DoesNotExist:
+    #         return Response("User not found", status=status.HTTP_404_NOT_FOUND)
+    #
+    #
+    #
+    # @action(detail=False, methods=['post'])
+    # def user_sign_in(self, request):
+    #     email = request.data.get('email')
+    #     password = request.data.get('password')
+    #
+    #     user = authenticate(request, email=email, password=password)
+    #     if user is not None:
+    #         login(request, user)
+    #         serializer = UserSerializer(user)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     else:
+    #         return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
+    #
+    #
+    # @action(detail=False, methods=['post'])
+    # def user_sign_out(self, request):
+    #     logout(request)
+    #     return Response("User signed out", status=status.HTTP_200_OK)
 
 
 

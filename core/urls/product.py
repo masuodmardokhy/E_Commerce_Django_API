@@ -11,8 +11,7 @@ router.register(r'', ProductViewSet, basename='ProductViewSet' )
 urlpatterns = [   # url for function base view
    path('', include(router.urls)),
 
-   path('/<int:pk>/add_to_cart/', ProductViewSet.as_view({'get': 'add_to_cart'}), name='add_to_cart'), # product add to cart
-
+   path('product/<int:pk>/add_to_cart/', ProductViewSet.as_view({'post': 'add_to_cart'}), name='add_to_cart'),
 
 
    # path('sort_filter_form', ProductViewSet.as_view({'get': 'sort_filter_form'}), name='sort_filter_form'), # list filtering sort by and pagination

@@ -7,8 +7,6 @@ from core.models.product import *
 from core.serializers.product import *                # * it means all
 from core.models.shopping_cart import *
 from core.models.cart_item import *
-from django.db.models import Min, Max
-from django import forms
 from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
@@ -28,6 +26,26 @@ class ProductViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, filters.OrderingFilter]
     ordering_fields = ['name', 'create', 'total_price']  # The fields you want to enable ordering on
     search_fields = ['name', 'total_price']  # The fields you want the search feature to be active on
+
+    @action(detail=True, methods=['post'], url_path='add_to_cart')
+    def add_to_cart(self, request, pk=None):
+        user = request.user
+        product = self.get_object()
+        amount = request.data.get('amount')
+
+        # Check if the user has a shopping cart
+        try:
+            cart_item = Cart_Item.objects.get(users=user, product=product)
+            cart_item.amount += amount
+            cart_item.save()
+        except Cart_Item.DoesNotExist:
+            # Create a new cart item for the product
+            cart_item = Cart_Item.objects.create(users=user, product=product, amount=amount)
+
+        return Response("Added to cart successfully", status=status.HTTP_200_OK)
+
+
+
 
 
     def list(self, request):
@@ -87,24 +105,6 @@ class ProductViewSet(viewsets.ModelViewSet):
             return Response("Deleted product with ID: {pk}", status=status.HTTP_204_NO_CONTENT)
         except Product.DoesNotExist:
             return Response("product not found", status=status.HTTP_404_NOT_FOUND)
-
-    @action(detail=True, methods=['post'])
-    def add_to_cart(self, request, pk=None):
-        user = request.user
-        product = self.get_object()
-        amount = request.data.get('amount')
-
-        # Check if the user has a shopping cart
-        try:
-            shopping_cart = user.shopping_cart
-        except Shopping_Cart.DoesNotExist:
-            # Create a new shopping cart for the user if it doesn't exist
-            shopping_cart = Shopping_Cart.objects.create(user=user)
-
-        # Create a new cart item for the product
-        cart_item = Cart_Item.objects.create(users=user, product=product, shopping_cart=shopping_cart, amount=amount)
-
-        return Response("Added to cart successfully", status=status.HTTP_200_OK)
 
 
 
