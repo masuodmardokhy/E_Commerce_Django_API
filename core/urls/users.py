@@ -11,8 +11,7 @@ router.register(r'', UsersViewSet, basename='user_view_set' )
 
 urlpatterns = [   # url for function base view
    path('', include(router.urls)),
-
-
+   path('login/', UsersViewSet.as_view({'post': 'login'}), name='user-login'),
 
    path('filter/name/<str:name>/', UsersViewSet.as_view({'get': 'filter_user_by_name'}), name='filter_user_by_id'),  # filter user by name API
    path('filter/id/<int:pk>/', UsersViewSet.as_view({'get': 'filter_user_by_id'}),name='filter_user-by-id'),  # filter user by id API

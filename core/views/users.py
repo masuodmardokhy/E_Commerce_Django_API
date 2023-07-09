@@ -1,11 +1,17 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from core.models.users import Users
 from core.serializers.users import *
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.decorators import action
+from django.contrib.auth.hashers import make_password
+from django.http import QueryDict
+from django.contrib.auth.hashers import check_password
 from django.contrib.auth import authenticate
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
+from core.serializers.token import *
+from django.contrib.auth.models import User
 
 
 
@@ -14,14 +20,73 @@ class UsersViewSet(viewsets.ModelViewSet):
     queryset = Users.objects.all()
     serializer_class = UserSerializer
 
+    # def create(self, request, *args, **kwargs):
+    #     data = request.data.copy()
+    #     password = data.get('password')
+    #     hashed_password = make_password(password)
+    #     data['password'] = hashed_password
+    #
+    #     serializer = self.get_serializer(data=data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #
+    #     # Create a token for the user
+    #     user = serializer.instance
+    #     token = Token.objects.create(user=user)
+    #
+    #     # Serialize the token
+    #     token_serializer = TokenSerializer(token)
+    #     response_data = serializer.data
+    #     response_data['token'] = token_serializer.data
+    #
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+    #
+
+
+    @action(detail=False, methods=['post'])
+    def login(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        try:
+            user = Users.objects.get(email=email)
+            if check_password(password, user.password):
+                serializer = UserSerializer(user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
+        except Users.DoesNotExist:
+            return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
+
+
+
+
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+        data = request.data.copy()
+        serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
+
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
+
+
+    # @action(detail=False, methods=['post'])
+    # def login(self, request):
+    #     email = request.data.get('email')
+    #     password = request.data.get('password')
+    #
+    #     user = authenticate(request, email=email, password=password)
+    #     if user is not None:
+    #         login(request, user)
+    #         serializer = UserSerializer(user)
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     else:
+    #         return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
+    #
 
 
 

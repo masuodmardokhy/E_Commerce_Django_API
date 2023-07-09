@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
-import datetime
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -41,8 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'core',
-
     'rest_framework',
+    'rest_framework.authtoken'
+
 
 ]
 
@@ -55,6 +55,8 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
 
 ROOT_URLCONF = 'E_Commerce_Django_API.urls'
 
@@ -95,13 +97,30 @@ DATABASES = {
 }
 
 
+
+
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
-    ],
+        'rest_framework.authentication.TokenAuthentication',
 
+    ],
 }
+
+
+
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': [],
+#
+#     'DEFAULT_AUTHENTICATION_CLASSES': [],
+# }
+# AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.AllowAllUsersModelBackend', )
+
+
+
+
 
 
 

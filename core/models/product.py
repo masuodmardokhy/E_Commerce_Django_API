@@ -15,7 +15,7 @@ class Product(BaseModel):
     amount = models.PositiveIntegerField()
     unit_price = models.PositiveIntegerField()
     discount = models.PositiveIntegerField(blank=True, null=True)
-    total_price = models.PositiveIntegerField()
+    total_price = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=True)
     description = models.CharField(max_length=300, blank=True, null=True)
     image = models.ImageField(upload_to='product_media', null= True)
@@ -29,7 +29,7 @@ class Product(BaseModel):
         return Product.objects.filter(category_id=id)
 
     @property
-    def total_price(self):         #we have this function to discount products.
+    def get_total_price(self):         #we have this function to discount products.
         if not self.discount:           #If there is a discount, calculate it and show the result in the total_price
             return self.unit_price
         elif self.discount:

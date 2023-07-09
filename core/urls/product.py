@@ -7,11 +7,14 @@ from core.views.product import *
 router = routers.DefaultRouter()   # url for class base view
 router.register(r'', ProductViewSet, basename='ProductViewSet' )
 
+app_name = 'core'
 
 urlpatterns = [   # url for function base view
    path('', include(router.urls)),
 
-   path('product/<int:pk>/add_to_cart/', ProductViewSet.as_view({'post': 'add_to_cart'}), name='add_to_cart'),
+   path('add_to_cart/<int:user>/<int:pk>', ProductViewSet.as_view({'post': 'add_to_cart'}), name='add_to_cart'),
+
+
 
 
    # path('sort_filter_form', ProductViewSet.as_view({'get': 'sort_filter_form'}), name='sort_filter_form'), # list filtering sort by and pagination

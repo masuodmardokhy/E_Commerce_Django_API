@@ -14,6 +14,7 @@ from rest_framework import filters
 
 
 
+
 class MyPagination(PageNumberPagination):
     page_size_query_param = 'size'
     max_page_size = 8
@@ -25,26 +26,27 @@ class ProductViewSet(viewsets.ModelViewSet):
     pagination_class = MyPagination
     filter_backends = [SearchFilter, filters.OrderingFilter]
     ordering_fields = ['name', 'create', 'total_price']  # The fields you want to enable ordering on
-    search_fields = ['name', 'total_price']  # The fields you want the search feature to be active on
-
-    @action(detail=True, methods=['post'], url_path='add_to_cart')
-    def add_to_cart(self, request, pk=None):
-        user = request.user
-        product = self.get_object()
-        amount = request.data.get('amount')
-
-        # Check if the user has a shopping cart
-        try:
-            cart_item = Cart_Item.objects.get(users=user, product=product)
-            cart_item.amount += amount
-            cart_item.save()
-        except Cart_Item.DoesNotExist:
-            # Create a new cart item for the product
-            cart_item = Cart_Item.objects.create(users=user, product=product, amount=amount)
-
-        return Response("Added to cart successfully", status=status.HTTP_200_OK)
+    search_fields = ['name',]  # The fields you want the search feature to be active on
 
 
+
+    # @action(detail=True, methods=['post'], url_path='add_to_cart')
+    # def add_to_cart(self, request, pk=None, user=None):
+    #     user = request.user
+    #     product = self.get_object()
+    #     amount = request.data.get('amount')
+    #
+    #     try:
+    #         cart_item = Cart_Item.objects.get(users=user, product=product)
+    #         cart_item.amount += amount
+    #         cart_item.save()
+    #     except Cart_Item.DoesNotExist:
+    #         # Create a new cart item for the product
+    #         cart_item = Cart_Item.objects.create(users=user, product=product, amount=amount)
+    #
+    #     return Response("Added to cart successfully", status=status.HTTP_200_OK)
+    #
+    #
 
 
 
