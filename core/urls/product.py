@@ -12,7 +12,7 @@ app_name = 'core'
 urlpatterns = [   # url for function base view
    path('', include(router.urls)),
 
-   path('add_to_cart/<int:user>/<int:pk>', ProductViewSet.as_view({'post': 'add_to_cart'}), name='add_to_cart'),
+   path('add_to_cart/<int:user_id>/<int:pk>/', ProductViewSet.as_view({'post': 'add_to_cart'}), name='add_to_cart'),
 
 
 

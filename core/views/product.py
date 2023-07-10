@@ -5,13 +5,12 @@ from rest_framework import status                      # for show messages
 from rest_framework import viewsets , permissions      # viewsets for class base view
 from core.models.product import *
 from core.serializers.product import *                # * it means all
-from core.models.shopping_cart import *
-from core.models.cart_item import *
-from rest_framework.views import APIView
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
-
+from core.models.users import *
+from core.models.cart_item import *
+from django.contrib.auth.models import AnonymousUser
 
 
 
@@ -27,6 +26,71 @@ class ProductViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, filters.OrderingFilter]
     ordering_fields = ['name', 'create', 'total_price']  # The fields you want to enable ordering on
     search_fields = ['name',]  # The fields you want the search feature to be active on
+
+
+
+    @action(detail=True, methods=['post'], url_path='add-to-cart')
+    def add_to_cart(self, request, pk=None, user_id=None):
+        product = self.get_object()
+        amount = request.data.get('amount')
+        name = product.name
+        total_price = product.get_total_price
+
+        try:
+            user = Users.objects.get(id=user_id)
+            # if isinstance(user,AnonymousUser):
+            #     user=None
+            # if user.is_anonymous:
+            #     return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
+            cart_item = Cart_Item.objects.get(user=user, product=product)
+            cart_item.amount += amount
+            cart_item.save()
+
+        except Users.DoesNotExist:
+            return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
+
+        except Cart_Item.DoesNotExist:
+            # Create a new cart item for the product
+            cart_item = Cart_Item.objects.create(user=user, product=product, amount=amount, name=name, price=total_price)
+
+        return Response("Added to cart successfully", status=status.HTTP_200_OK)
+
+
+
+
+    # @staticmethod
+    # def add_to_cart(request, pk=None):
+    #     user_id = request.data.get('user_id')
+    #     product = Product.objects.get(pk=pk)
+    #
+    #     try:
+    #         user = Users.objects.get(id=user_id)
+    #         cart_item = Cart_Item.objects.create(user=user, product=product, name=product.name, amount=product.amount, price=product.total_price)
+    #         return Response("Item added to cart successfully", status=status.HTTP_200_OK)
+    #     except Users.DoesNotExist:
+    #         return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
+
+
+
+    # @action(detail=True, methods=['post'], url_path='add_to_cart/(?P<user_id>\d+)')
+    # def add_to_cart(self, request, pk=None, user_id=None):
+    #     product = self.get_object()
+    #     amount = request.data.get('amount')
+    #
+    #     try:
+    #         user = Users.objects.get(id=user_id)
+    #         shopping_cart = ShoppingCart.objects.get(user=user)
+    #     except Users.DoesNotExist:
+    #         return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
+    #     except ShoppingCart.DoesNotExist:
+    #         return Response("Shopping cart not found", status=status.HTTP_404_NOT_FOUND)
+    #
+    #     cart_item = Cart_Item.create_from_product(product, user, shopping_cart)
+    #
+    #     return Response("Added to cart successfully", status=status.HTTP_200_OK)
+    #
+
+
 
 
 

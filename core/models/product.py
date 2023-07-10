@@ -12,7 +12,7 @@ class Product(BaseModel):
     sub_category = models.ForeignKey(Sub_Category, on_delete=models.CASCADE, default=1)
     name = models.CharField(max_length=30)
     slug = models.SlugField(allow_unicode=True, unique=True, null=True, blank=True)
-    amount = models.PositiveIntegerField()
+    amount = models.PositiveIntegerField(default=1)
     unit_price = models.PositiveIntegerField()
     discount = models.PositiveIntegerField(blank=True, null=True)
     total_price = models.PositiveIntegerField(default=0)

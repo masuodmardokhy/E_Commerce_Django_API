@@ -20,10 +20,10 @@ class MyPagination(PageNumberPagination):
 class Shopping_CartViewSet(viewsets.ModelViewSet):
     queryset = Shopping_Cart.objects.all()
     serializer_class = Shapping_CartSerializer
-    filter_backends = [SearchFilter, filters.OrderingFilter]
-    ordering_fields = ['order', 'create']  # The fields you want to enable ordering on
-    search_fields = ['order', ]  # The fields you want the search feature to be active on
     pagination_class = MyPagination
+    filter_backends = [SearchFilter, filters.OrderingFilter]
+    ordering_fields = ['name', 'create']  # The fields you want to enable ordering on
+    search_fields = ['name', ]  # The fields you want the search feature to be active on
 
 
     def list(self, request):
