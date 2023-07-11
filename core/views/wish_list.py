@@ -10,4 +10,4 @@ from core.serializers.shopping_cart import *
 
 class Wish_ListViewSet(viewsets.ModelViewSet):
     queryset = Shopping_Cart.objects.all()
-    serializer_class = Shapping_CartSerializer
+    serializer_class = Shopping_CartSerializer

@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework import status                       # for show messages
 from rest_framework import viewsets , permissions       # viewsets for class base view
 from core.models.shopping_cart import *                     # * it means all
+from core.models.shopping_cart import Shopping_Cart                   # * it means all
 from core.serializers.shopping_cart import *
 from core.models.order import Order
 from rest_framework.filters import SearchFilter
@@ -19,28 +20,43 @@ class MyPagination(PageNumberPagination):
 
 class Shopping_CartViewSet(viewsets.ModelViewSet):
     queryset = Shopping_Cart.objects.all()
-    serializer_class = Shapping_CartSerializer
+    serializer_class = Shopping_CartSerializer
     pagination_class = MyPagination
     filter_backends = [SearchFilter, filters.OrderingFilter]
     ordering_fields = ['name', 'create']  # The fields you want to enable ordering on
     search_fields = ['name', ]  # The fields you want the search feature to be active on
 
 
-    def list(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
+    def list(self, request, *args, **kwargs):
+        shopping_carts = self.get_queryset()
+        data = []
+        for cart in shopping_carts:
+            cart_data = {
+                'user': cart.user_id,
+                'total_price': cart.total_price,
+                'total_amount': cart.total_amount,
+                'list_cartitem': [item.id for item in cart.list_cartitem.all()]
+            }
+            data.append(cart_data)
 
-        # Apply ordering if requested
-        shopp = request.query_params.get('ordering')
-        if shopp in self.ordering_fields:
-            queryset = queryset.order_by(shopp)
+        return Response(data)
 
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
+    # def list(self, request):
+    #     queryset = self.filter_queryset(self.get_queryset())
+    #
+    #     # Apply ordering if requested
+    #     shopp = request.query_params.get('ordering')
+    #     if shopp in self.ordering_fields:
+    #         queryset = queryset.order_by(shopp)
+    #
+    #     page = self.paginate_queryset(queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True)
+    #         return self.get_paginated_response(serializer.data)
+    #
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     return Response(serializer.data)
 
 
 
@@ -122,3 +138,43 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
             return Response("The order was successfully.", status=status.HTTP_200_OK)
         except Shopping_Cart.DoesNotExist:
             return Response("Cart not found.", status=status.HTTP_404_NOT_FOUND)
+
+
+
+    # @action(detail=True, methods=['post'], url_path='cart_add/(?P<id>\d+)')
+    # def cart_add(self, request, id=None):
+    #     cart = Cart_Item(request)
+    #     product = Product.objects.get(id=id)
+    #     cart.add(product=product)
+    #     return Response("Product added to cart successfully", status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='item_clear/(?P<id>\d+)')
+    def item_clear(self, request, id=None):
+        cart = Cart_Item(request)
+        product = Product.objects.get(id=id)
+        cart.remove(product)
+        return Response("Product removed from cart successfully", status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='item_increment/(?P<id>\d+)')
+    def item_increment(self, request, id=None):
+        cart = Cart_Item(request)
+        product = Product.objects.get(id=id)
+        cart.add(product=product)
+        return Response("Product quantity incremented successfully", status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['post'], url_path='item_decrement/(?P<id>\d+)')
+    def item_decrement(self, request, id=None):
+        cart = Cart_Item(request)
+        product = Product.objects.get(id=id)
+        cart.decrement(product=product)
+        return Response("Product quantity decremented successfully", status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'], url_path='cart_clear')
+    def cart_clear(self, request):
+        cart = Cart_Item(request)
+        cart.clear()
+        return Response("Cart cleared successfully", status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='cart_detail')
+    def cart_detail(self, request):
+        return Response("Cart detail view", status=status.HTTP_200_OK)
