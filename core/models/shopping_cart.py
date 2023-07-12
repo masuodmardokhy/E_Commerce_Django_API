@@ -9,7 +9,9 @@ class Shopping_Cart(BaseModel):
     order = models.OneToOneField(Order, on_delete=models.CASCADE, default='')
     user = models.OneToOneField(Users, on_delete=models.CASCADE, default='')
     total_price = models.PositiveIntegerField()
-    total_amount = models.PositiveIntegerField()
+    total_amount_item = models.PositiveIntegerField()
+    total_amount_product= models.PositiveIntegerField(default=0)
+
 
     def __str__(self):
         return self.total_price

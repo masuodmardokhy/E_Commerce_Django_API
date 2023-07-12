@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'core',
+    'cart',
     'rest_framework',
     'rest_framework.authtoken'
 
@@ -119,10 +120,7 @@ REST_FRAMEWORK = {
 # AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.AllowAllUsersModelBackend', )
 
 
-
-
-
-
+'cart.context_processor.cart_total_amount'
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

@@ -4,7 +4,9 @@ from rest_framework.decorators import action
 from rest_framework import status                       # for show messages
 from rest_framework import viewsets , permissions       # viewsets for class base view
 from core.models.shopping_cart import *                     # * it means all
-from core.models.shopping_cart import Shopping_Cart                   # * it means all
+from core.models.cart_item import Cart_Item                     # * it means all
+from core.serializers.cart_item import *
+from core.serializers.users import *
 from core.serializers.shopping_cart import *
 from core.models.order import Order
 from rest_framework.filters import SearchFilter
@@ -27,19 +29,61 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
     search_fields = ['name', ]  # The fields you want the search feature to be active on
 
 
-    def list(self, request, *args, **kwargs):
-        shopping_carts = self.get_queryset()
-        data = []
-        for cart in shopping_carts:
-            cart_data = {
-                'user': cart.user_id,
-                'total_price': cart.total_price,
-                'total_amount': cart.total_amount,
-                'list_cartitem': [item.id for item in cart.list_cartitem.all()]
-            }
-            data.append(cart_data)
+    def list(self, request, user_id=None):
+        try:
+            cart_items = Cart_Item.objects.filter(user=user_id)
+            shopping_cart_data = {'cart_items': cart_items}
+            serializer = Shopping_CartListSerializer(shopping_cart_data)
 
-        return Response(data)
+            return Response(serializer.data)
+        except Users.DoesNotExist:
+            return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
+
+
+    # def list(self, request,pk=None, *args, **kwargs):
+    #     cart_items = Cart_Item.objects.filter(user=pk)
+    #     shopping_cart_data = {'cart_items': cart_items}
+    #     serializer = Shopping_CartListSerializer(shopping_cart_data)
+    #
+    #     return Response(serializer.data)
+
+    # def list(self, request, *args, **kwargs):
+    #     cart_items = Cart_Item.objects.all()
+    #     cart_items_data = Cart_ItemSerializer(cart_items, many=True).data
+    #     shopping_carts_data = {'cart_items': cart_items_data}
+    #     return Response(shopping_carts_data)
+
+    # def list(self, request, *args, **kwargs):
+    #     cart_items = Cart_Item.objects.all()
+    #     cart_items_data = Cart_ItemSerializer(cart_items, many=True).data
+    #
+    #     total_price = sum(item['price'] for item in cart_items_data)
+    #     total_amount = len(cart_items_data)
+    #
+    #     shopping_carts_data = {
+    #         'cart_items': cart_items_data,
+    #         'total_price': total_price,
+    #         'total_amount': total_amount
+    #     }
+    #
+    #     return Response(shopping_carts_data)
+
+
+
+    # def list(self, request, *args, **kwargs):
+    #     shopping_carts = self.get_queryset()
+    #     data = []
+    #     for cart in shopping_carts:
+    #         cart_data = {
+    #             'user': cart.user_id,
+    #             'total_price': cart.total_price,
+    #             'total_amount': cart.total_amount,
+    #             'list_cartitem': [item.id for item in cart.list_cartitem.all()]
+    #         }
+    #
+    #         data.append(cart_data)
+    #
+    #     return Response(data)
 
 
     # def list(self, request):
@@ -141,12 +185,12 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
 
 
 
-    # @action(detail=True, methods=['post'], url_path='cart_add/(?P<id>\d+)')
-    # def cart_add(self, request, id=None):
-    #     cart = Cart_Item(request)
-    #     product = Product.objects.get(id=id)
-    #     cart.add(product=product)
-    #     return Response("Product added to cart successfully", status=status.HTTP_200_OK)
+    @action(detail=True, methods=['post'])
+    def cart_add(self, request, id=None):
+        cart = Cart_Item(request)
+        product = Product.objects.get(id=id)
+        cart.add(product=product)
+        return Response("Product added to cart successfully", status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='item_clear/(?P<id>\d+)')
     def item_clear(self, request, id=None):
