@@ -28,113 +28,128 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
     ordering_fields = ['name', 'create']  # The fields you want to enable ordering on
     search_fields = ['name', ]  # The fields you want the search feature to be active on
 
-
     def list(self, request, user_id=None):
         try:
-            cart_items = Cart_Item.objects.filter(user=user_id)
+            if user_id is not None:
+                cart_items = Cart_Item.objects.filter(user=user_id)
+            else:
+                cart_items = Cart_Item.objects.all()
+
             shopping_cart_data = {'cart_items': cart_items}
             serializer = Shopping_CartListSerializer(shopping_cart_data)
+
+            # Check if there are any changes in the request data
+            if request.data:
+                product_id = request.data.get('product_id')
+                new_amount = request.data.get('new_amount')
+                serializer.update_amount(product_id, new_amount)
 
             return Response(serializer.data)
         except Users.DoesNotExist:
             return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
 
 
-    # def list(self, request,pk=None, *args, **kwargs):
-    #     cart_items = Cart_Item.objects.filter(user=pk)
-    #     shopping_cart_data = {'cart_items': cart_items}
-    #     serializer = Shopping_CartListSerializer(shopping_cart_data)
+    @action(detail=True, methods=['patch'])
+    def update_amount(self, request, user_id=None, id=None):
+        try:
+            shopping_cart = Shopping_Cart.objects.get(user=user_id)
+            product = Product.objects.get(id=id)
+
+            # Get the product ID and new amount from the request data
+            product_id = request.data.get('product_id')
+            new_amount = request.data.get('new_amount')
+
+            # Update the amount in the shopping cart
+            shopping_cart.update_amount(product_id, new_amount)
+
+            serializer = Shopping_CartListSerializer(shopping_cart)
+            return Response(serializer.data)
+        except Shopping_Cart.DoesNotExist:
+            return Response("Shopping Cart not found", status=status.HTTP_404_NOT_FOUND)
+
+    @action(detail=True, methods=['post'], url_path='item_clear/(?P<id>\d+)')
+    def item_clear(self, request, id=None):
+        cart = Cart_Item(request)
+        product = Product.objects.get(id=id)
+        cart.remove(product)
+        return Response("Product removed from cart successfully", status=status.HTTP_200_OK)
+
+
+    # def list(self, request, user_id=None):
+    #     try:
+    #         if user_id is not None:
+    #             cart_items = Cart_Item.objects.filter(user=user_id)
+    #         else:
+    #             cart_items = Cart_Item.objects.all()
     #
-    #     return Response(serializer.data)
-
-    # def list(self, request, *args, **kwargs):
-    #     cart_items = Cart_Item.objects.all()
-    #     cart_items_data = Cart_ItemSerializer(cart_items, many=True).data
-    #     shopping_carts_data = {'cart_items': cart_items_data}
-    #     return Response(shopping_carts_data)
-
-    # def list(self, request, *args, **kwargs):
-    #     cart_items = Cart_Item.objects.all()
-    #     cart_items_data = Cart_ItemSerializer(cart_items, many=True).data
+    #         shopping_cart_data = {'cart_items': cart_items}
+    #         serializer = Shopping_CartListSerializer(shopping_cart_data)
     #
-    #     total_price = sum(item['price'] for item in cart_items_data)
-    #     total_amount = len(cart_items_data)
+    #         return Response(serializer.data)
+    #     except Users.DoesNotExist:
+    #         return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
+
+
+    # def partial_update(self, request, pk=None):
+    #     try:
+    #         shopping_cart = Shopping_Cart.objects.get(pk=pk)
     #
-    #     shopping_carts_data = {
-    #         'cart_items': cart_items_data,
-    #         'total_price': total_price,
-    #         'total_amount': total_amount
-    #     }
+    #         # Update the cart_items based on request.data
+    #         cart_items_data = request.data.get('cart_items', [])
+    #         for item_data in cart_items_data:
+    #             item_id = item_data.get('id')
+    #             amount = item_data.get('amount')
+    #             if item_id is not None:
+    #                 cart_item = Cart_Item.objects.get(pk=item_id, shopping_cart=shopping_cart)
+    #                 cart_item.amount = amount
+    #                 cart_item.save()
     #
-    #     return Response(shopping_carts_data)
-
-
-
-    # def list(self, request, *args, **kwargs):
-    #     shopping_carts = self.get_queryset()
-    #     data = []
-    #     for cart in shopping_carts:
-    #         cart_data = {
-    #             'user': cart.user_id,
-    #             'total_price': cart.total_price,
-    #             'total_amount': cart.total_amount,
-    #             'list_cartitem': [item.id for item in cart.list_cartitem.all()]
-    #         }
+    #         # Recalculate total_price, total_amount_item, and total_amount_product
+    #         shopping_cart.total_price = shopping_cart.get_total_price()
+    #         shopping_cart.total_amount_item = shopping_cart.get_total_amount_item()
+    #         shopping_cart.total_amount_product = shopping_cart.get_total_amount_product()
+    #         shopping_cart.save()
     #
-    #         data.append(cart_data)
+    #         serializer = Shopping_CartSerializer(shopping_cart)
+    #         return Response(serializer.data)
+    #     except Shopping_Cart.DoesNotExist:
+    #         return Response("Shopping Cart not found", status=status.HTTP_404_NOT_FOUND)
+    #     except Cart_Item.DoesNotExist:
+    #         return Response("Product not found in the shopping cart", status=status.HTTP_404_NOT_FOUND)
     #
-    #     return Response(data)
 
 
-    # def list(self, request):
-    #     queryset = self.filter_queryset(self.get_queryset())
+
+    # def partial_update(self, request, user_id=None, product_id=None):
+    #     try:
+    #         shopping_cart = Shopping_Cart.objects.get(user=user_id)
+    #         cart_item = Cart_Item.objects.get(shopping_cart=shopping_cart, product=product_id)
     #
-    #     # Apply ordering if requested
-    #     shopp = request.query_params.get('ordering')
-    #     if shopp in self.ordering_fields:
-    #         queryset = queryset.order_by(shopp)
+    #         cart_item.save()
     #
-    #     page = self.paginate_queryset(queryset)
-    #     if page is not None:
-    #         serializer = self.get_serializer(page, many=True)
-    #         return self.get_paginated_response(serializer.data)
+    #         shopping_cart.total_price = shopping_cart.get_total_price()
+    #         shopping_cart.total_amount_item = shopping_cart.get_total_amount_item()
+    #         shopping_cart.total_amount_product = shopping_cart.get_total_amount_product()
+    #         shopping_cart.save()
     #
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     return Response(serializer.data)
+    #         serializer = Shopping_CartListSerializer(shopping_cart)
+    #         return Response(serializer.data)
+    #
+    #     except Shopping_Cart.DoesNotExist:
+    #         return Response("Shopping Cart not found", status=status.HTTP_404_NOT_FOUND)
+    #     except Cart_Item.DoesNotExist:
+    #         return Response("Product not found in the shopping cart", status=status.HTTP_404_NOT_FOUND)
 
 
 
-    def retrieve(self, request, pk=None):
-        shopping_cart = self.get_object()
-        serializer = self.get_serializer(shopping_cart)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-    def update(self, request, pk=None):
-        shopping_cart = self.get_object()
-        serializer = self.get_serializer(shopping_cart, data=request.data, partial=True)  # partial = True, This means that only the part of the data that needs to be updated
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def partial_update(self, request, pk=None):
-        shopping_cart = self.get_object()
-        serializer = self.get_serializer(shopping_cart, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    # def partial_update(self, request, pk=None):
+    #     shopping_cart = self.get_object()
+    #     serializer = self.get_serializer(shopping_cart, data=request.data, partial=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    #
 
     def destroy(self, request, pk=None):
         try:
@@ -183,14 +198,6 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
         except Shopping_Cart.DoesNotExist:
             return Response("Cart not found.", status=status.HTTP_404_NOT_FOUND)
 
-
-
-    @action(detail=True, methods=['post'])
-    def cart_add(self, request, id=None):
-        cart = Cart_Item(request)
-        product = Product.objects.get(id=id)
-        cart.add(product=product)
-        return Response("Product added to cart successfully", status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['post'], url_path='item_clear/(?P<id>\d+)')
     def item_clear(self, request, id=None):
