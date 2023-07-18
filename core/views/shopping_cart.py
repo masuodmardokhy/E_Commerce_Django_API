@@ -12,6 +12,7 @@ from core.models.order import Order
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
+from django.http import Http404
 
 
 
@@ -32,11 +33,11 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
         try:
             if user_id is not None:
                 cart_items = Cart_Item.objects.filter(user=user_id)
-            else:
-                cart_items = Cart_Item.objects.all()
+                shopping_cart_data = {'cart_items': cart_items}
+                serializer = Shopping_CartListSerializer(shopping_cart_data)
 
-            shopping_cart_data = {'cart_items': cart_items}
-            serializer = Shopping_CartListSerializer(shopping_cart_data)
+            else:
+                return Response("enter user_id for get shopping cart. ", status=status.HTTP_404_NOT_FOUND)
 
             # Check if there are any changes in the request data
             if request.data:

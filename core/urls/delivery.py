@@ -6,7 +6,7 @@ from core.views.delivery import *
 
 
 router = routers.DefaultRouter()        # url for class base view
-router.register('delivery_view_set',DeliveryViewSet),
+router.register(r'',DeliveryViewSet, basename='DeliveryViewSet'),
 
 app_name = "delivery"
 urlpatterns = [

@@ -6,7 +6,7 @@ from core.models.users import *
 
 
 class Order(BaseModel):
-    user = models.OneToOneField(Users, on_delete=models.CASCADE, default='')
+    user = models.OneToOneField('core.Users', on_delete=models.CASCADE, default='')
     name = models.CharField(max_length=30)
     total_price = models.PositiveIntegerField()
     total_amount_product= models.PositiveIntegerField(default=0)

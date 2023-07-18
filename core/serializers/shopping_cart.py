@@ -2,13 +2,21 @@ from rest_framework import serializers
 from core.models.shopping_cart import *
 from core.serializers.cart_item import Cart_ItemSerializer
 
+# class Shopping_CartSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Shopping_Cart
+#         fields = ['id', 'user', 'delivery', 'total_price', 'total_amount_product', 'total_amount_item']
+
 class Shopping_CartSerializer(serializers.ModelSerializer):
-    total_amount_product = serializers.IntegerField(source='total_amount_product')
-    send_to_out_Capital = serializers.BooleanField(default=False)
-    send_price = serializers.IntegerField(default=10)
+    cart_items = Cart_ItemSerializer(many=True, read_only=True)
+    calculated_total_price = serializers.SerializerMethodField()
+
     class Meta:
         model = Shopping_Cart
-        fields = ['id', 'order', 'user', 'total_price', 'total_amount_product', 'total_amount_item']
+        fields = ['id', 'user', 'delivery', 'total_price', 'total_amount_item', 'total_amount_product', 'calculated_total_price', 'cart_items']
+
+    def get_calculated_total_price(self, obj):
+        return sum(item.price for item in obj.cart_items)
 
 
 class Shopping_CartListSerializer(serializers.Serializer):
@@ -27,6 +35,8 @@ class Shopping_CartListSerializer(serializers.Serializer):
     def get_total_amount_item(self, obj):
         cart_items_data = self.fields['cart_items'].to_representation(obj['cart_items'])
         return len(cart_items_data)
+
+
 
     # def update_amount(self, product_id, new_amount):
     #     # Get the cart items data
