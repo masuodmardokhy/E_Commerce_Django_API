@@ -17,7 +17,7 @@ class Users(BaseModel):
         self.save()
 
     def __str__(self):
-        return self.email
+        return self.first_name
 
     @staticmethod
     def user_by_email(getemail):

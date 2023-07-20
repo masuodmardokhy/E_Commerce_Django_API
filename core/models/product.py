@@ -9,7 +9,7 @@ from core.models.sub_category import *
 
 class Product(BaseModel):
     users = models.ForeignKey(Users, on_delete=models.CASCADE, default=1)
-    sub_category = models.ForeignKey(Sub_Category, on_delete=models.CASCADE, default=1)
+    category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
     slug = models.SlugField(allow_unicode=True, unique=True, null=True, blank=True)
     amount = models.PositiveIntegerField(default=1)
