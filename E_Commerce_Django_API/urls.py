@@ -34,7 +34,7 @@ urlpatterns = [
     path('order/', include('core.urls.order')),
     path('product/', include('core.urls.product')),
     path('shopping_cart/', include('core.urls.shopping_cart')),
-    path('sub_category/', include('core.urls.sub_category')),
+    # path('sub_category/', include('core.urls.sub_category')),
     path('users/', include('core.urls.users')),
     path('wish_list/', include('core.urls.wish_list')),
 

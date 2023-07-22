@@ -12,7 +12,7 @@ router.register(r'',CategoryViewSet, basename='category_view_set'),
 urlpatterns = [       # url for function base view
     path('', include(router.urls)),
     # path('', CategoryViewSet.as_view({'get': 'list'}), name='category-list'),  # list filtering sort by and pagination
-    path('cat_tree/', CategoryViewSet.as_view({'get': 'get_category_tree'}), name='get_category_tree'),
+    path('tree/', CategoryViewSet.as_view({'GET': 'unique_categories'}), name='unique_categories'),
 
 
 

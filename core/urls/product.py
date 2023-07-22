@@ -13,6 +13,7 @@ urlpatterns = [   # url for function base view
    path('', include(router.urls)),
 
    path('add_to_cart/<int:user_id>/<int:pk>/', ProductViewSet.as_view({'post': 'add_to_cart'}), name='add_to_cart'),
+   path('delete_all_products/', ProductViewSet.as_view({'post': 'delete_all_products'}), name='delete_all_products'),
 
 
 

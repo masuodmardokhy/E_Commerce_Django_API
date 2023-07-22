@@ -2,7 +2,6 @@ from rest_framework.decorators import api_view          # viewsets for class bas
 from rest_framework.response import Response
 from rest_framework import status                       # for show messages
 from rest_framework import viewsets , permissions       # viewsets for class base view
-from core.models.cart_item import *
 from core.serializers.cart_item import *
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination

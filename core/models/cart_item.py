@@ -10,7 +10,7 @@ class Cart_Item(BaseModel):
     product = models.OneToOneField(Product, on_delete=models.CASCADE, default='')
     shopping_cart = models.ForeignKey(Shopping_Cart, related_name='list_cartitem', on_delete=models.CASCADE, default='', null=True)
     name = models.CharField(max_length=40)
-    amount = models.PositiveIntegerField()
+    amount = models.PositiveIntegerField(default=1)
     price = models.PositiveIntegerField()
 
     def __str__(self):

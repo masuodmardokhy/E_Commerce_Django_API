@@ -29,9 +29,11 @@ class Shopping_CartListSerializer(serializers.Serializer):
     def get_total_price(self, obj):                                                       # obj['cart_items']: A list of shopping cart items
         cart_items_data = self.fields['cart_items'].to_representation(obj['cart_items'])  # Convert the data in obj['cart items'] to display
         return sum(item['price'] for item in cart_items_data)
+
     def get_total_amount_product(self, obj):
         cart_items_data = self.fields['cart_items'].to_representation(obj['cart_items'])
-        return sum(item['product'] for item in cart_items_data)
+        return sum(item['amount'] for item in cart_items_data)
+
     def get_total_amount_item(self, obj):
         cart_items_data = self.fields['cart_items'].to_representation(obj['cart_items'])
         return len(cart_items_data)

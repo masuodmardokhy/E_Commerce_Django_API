@@ -2,8 +2,9 @@ from django.db import models
 from django.utils.timezone import datetime
 from core.models.base import *
 from core.models.users import *
-from core.models.sub_category import *
-
+from core.models.category import *
+from django.utils.text import slugify
+import re
 
 
 
@@ -23,20 +24,29 @@ class Product(BaseModel):
     def __str__(self):
         return self.name
 
-
-    @staticmethod
-    def products_by_id(id):
-        return Product.objects.filter(category_id=id)
-
     @property
-    def get_total_price(self):         #we have this function to discount products.
-        if not self.discount:           #If there is a discount, calculate it and show the result in the total_price
+    def calculate_total_price(self):   # Property to calculate the total price
+        if not self.discount:
             return self.unit_price
-        elif self.discount:
-            t = (self.unit_price * self.discount)/100
+        else:
+            t = (self.unit_price * self.discount) / 100
             return int(self.unit_price - t)
-        return self.total_price
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = persian_slugify(self.name)
+        super().save(*args, **kwargs)
+
+
+def persian_slugify(value):   # for create slug field with persian language
+    value = re.sub(r'(a(?!([eiou]|$)))|e|i|o|u', '', value, flags=re.IGNORECASE)     # Remove extra words from the name
+    return slugify(value, allow_unicode=True)    # Convert name to slug
+
+
+
+    # @staticmethod
+    # def products_by_id(id):
+    #     return Product.objects.filter(category_id=id)
 
     # @property
     # def image_display(self):

@@ -3,18 +3,16 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status                      # for show messages
 from rest_framework import viewsets , permissions      # viewsets for class base view
-from core.models.category import *
 from core.serializers.category import *                # * it means all
-from django.db.models import Min, Max
 from core.models.category import *
+from rest_framework import filters
+from rest_framework.filters import SearchFilter
+
 
 
 class MyPagination(PageNumberPagination):
-    page_size = 3
-    page_size_query_param = 'page_size'
-    max_page_size = 10
-
-
+    page_size_query_param = 'size'
+    max_page_size = 8
 
 
 
@@ -22,14 +20,38 @@ class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     pagination_class = MyPagination
-
-    @action(detail=False, methods=['get'])
-    def get_category_tree(self, request, *args, **kwargs):
-        top_level_categories = Category.objects.filter(sub__isnull=True)
-        serializer = CategoryWithSubcategoriesSerializer(top_level_categories, many=True, context={'request': request})
-        return Response(serializer.data)
+    filter_backends = [SearchFilter, filters.OrderingFilter]
+    ordering_fields = ['name', 'create', 'total_price']  # The fields you want to enable ordering on
+    search_fields = ['name',]  # The fields you want the search feature to be active on
 
 
+
+
+
+    # @action(detail=False, methods=['GET'])
+    # def unique_categories(self, request):
+    #     categories = self.get_queryset()
+    #     serialized_data = []
+    #     shown_categories = {}
+    #
+    #     for category in categories:
+    #         if category.id not in shown_categories:
+    #             serializer = self.get_serializer(category)
+    #             serialized_data.append(serializer.data)
+    #             shown_categories[category.id] = True
+    #
+    #     return Response({
+    #         'count': len(serialized_data),
+    #         'results': serialized_data,
+    #     })
+    #
+
+    # @action(detail=False, methods=['get'])
+    # def get_category_tree(self, request, *args, **kwargs):
+    #     top_level_categories = Category.objects.filter(sub__isnull=True)
+    #     serializer = CategoryWithSubcategoriesSerializer(top_level_categories, many=True, context={'request': request})
+    #     return Response(serializer.data)
+    #
 
 
 
