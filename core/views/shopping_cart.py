@@ -1,4 +1,3 @@
-from rest_framework.decorators import api_view          # viewsets for class base view
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status                       # for show messages
@@ -12,7 +11,9 @@ from core.models.order import Order
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
-from django.http import Http404
+from django.core.serializers.json import DjangoJSONEncoder
+import json
+from rest_framework.views import APIView
 
 
 
@@ -35,9 +36,8 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
                 cart_items = Cart_Item.objects.filter(user=user_id)
                 shopping_cart_data = {'cart_items': cart_items}
                 serializer = Shopping_CartListSerializer(shopping_cart_data)
-
             else:
-                return Response("enter user_id for get shopping cart. ", status=status.HTTP_404_NOT_FOUND)
+                return Response("Enter user_id to get shopping cart.", status=status.HTTP_404_NOT_FOUND)
 
             # Check if there are any changes in the request data
             if request.data:
@@ -45,9 +45,86 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
                 new_amount = request.data.get('new_amount')
                 serializer.update_amount(product_id, new_amount)
 
+            # Get the calculated results from the serializer
+            calculated_results = serializer.data
+
+            # Create a dictionary to store the data for the cart_items field
+            cart_items_data = {
+                'user': user_id,
+                'items': calculated_results['cart_items'],
+                'total_price': calculated_results['total_price'],
+                'total_amount_item': calculated_results['total_amount_item'],
+                'total_amount_product': calculated_results['total_amount_product']
+            }
+
+            # Convert the cart_items_data to JSON format
+            cart_items_json = json.dumps(cart_items_data, cls=DjangoJSONEncoder)
+
+            # Create or update the Shopping_Cart object for the user
+            shopping_cart, _ = Shopping_Cart.objects.update_or_create(user_id=user_id,
+                                                                      defaults={'cart_items': cart_items_json})
+
             return Response(serializer.data)
         except Users.DoesNotExist:
             return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
+
+class TotalPriceView(APIView):
+    def get(self, request, user_id=None):
+        try:
+            if user_id is not None:
+                shopping_cart = Shopping_Cart.objects.get(user_id=user_id)
+                total_price = shopping_cart.total_price
+                send_price = shopping_cart.delivery.send_price
+                calculated_total_price = total_price + send_price
+
+                response_data = {
+                    'total_price': total_price,
+                    'send_price': send_price,
+                    'calculated_total_price': calculated_total_price
+                }
+                return Response(response_data)
+            else:
+                return Response("Enter user_id to get the total price.", status=status.HTTP_404_NOT_FOUND)
+        except Shopping_Cart.DoesNotExist:
+            return Response("Shopping Cart not found for this user.", status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+    # def deliveryandprice(self, request, user_id=None):
+    #     try:
+    #         if user_id is not None:
+    #             cart_items = Cart_Item.objects.filter(user=user_id)
+    #
+    #             if not cart_items.exists():  # بررسی وجود آیتم‌های کارت خرید
+    #                 return Response("No cart items found for this user.", status=status.HTTP_404_NOT_FOUND)
+    #
+    #             shopping_cart = cart_items[0].shopping_cart
+    #
+    #             if not shopping_cart:
+    #                 return Response("Shopping Cart not found for this user.", status=status.HTTP_404_NOT_FOUND)
+    #
+    #             if not shopping_cart.delivery:
+    #                 return Response("Delivery not found for this shopping cart.", status=status.HTTP_404_NOT_FOUND)
+    #
+    #             total_price = serializer.data['total_price']
+    #             send_price = shopping_cart.delivery.send_price
+    #
+    #             calculated_total_price = total_price + send_price
+    #
+    #             response_data = {
+    #                 'total_price': total_price,
+    #                 'send_price': send_price,
+    #                 'calculated_total_price': calculated_total_price
+    #             }
+    #
+    #             return Response(response_data)
+    #         else:
+    #             return Response("Enter user_id to get the shopping cart.", status=status.HTTP_404_NOT_FOUND)
+    #     except Users.DoesNotExist:
+    #         return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
+    #
 
 
     @action(detail=True, methods=['patch'])
@@ -68,12 +145,39 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
         except Shopping_Cart.DoesNotExist:
             return Response("Shopping Cart not found", status=status.HTTP_404_NOT_FOUND)
 
+
     @action(detail=True, methods=['post'], url_path='item_clear/(?P<id>\d+)')
     def item_clear(self, request, id=None):
         cart = Cart_Item(request)
         product = Product.objects.get(id=id)
         cart.remove(product)
         return Response("Product removed from cart successfully", status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
+
+# class Totalprice_DeliveryViewSet(viewsets.ModelViewSet):
+#     queryset = Shopping_Cart.objects.all()
+#     serializer_class = Totalprice_DeliverySerializer
+#
+#     def get_total_price(self, request, user_id=None):
+#         try:
+#             print('ff')
+#             shopping_cart = Shopping_Cart.objects.filter(user=user_id).first()
+#             if shopping_cart:
+#                 serializer = Totalprice_DeliverySerializer(shopping_cart)
+#                 return Response(serializer.data)
+#             else:
+#                 return Response("Shopping Cart not foundtt", status=status.HTTP_404_NOT_FOUND)
+#
+#         except Shopping_Cart.DoesNotExist:
+#             return Response("Shopping Cart not founddd", status=status.HTTP_404_NOT_FOUND)
+
 
 
     # def list(self, request, user_id=None):

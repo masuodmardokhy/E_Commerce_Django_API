@@ -2,22 +2,22 @@ from rest_framework import serializers
 from core.models.shopping_cart import *
 from core.serializers.cart_item import Cart_ItemSerializer
 
-# class Shopping_CartSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Shopping_Cart
-#         fields = ['id', 'user', 'delivery', 'total_price', 'total_amount_product', 'total_amount_item']
-
 class Shopping_CartSerializer(serializers.ModelSerializer):
     cart_items = Cart_ItemSerializer(many=True, read_only=True)
     calculated_total_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Shopping_Cart
-        fields = ['id', 'user', 'delivery', 'total_price', 'total_amount_item', 'total_amount_product', 'calculated_total_price', 'cart_items']
+        fields = ['id', 'user', 'delivery', 'total_price', 'total_amount_item', 'total_amount_product', 'calculated_total_price', 'cart_items' ]
 
-    def get_calculated_total_price(self, obj):
-        return sum(item.price for item in obj.cart_items)
 
+    # def get_calculated_total_price(self, instance):
+    #     return instance.total_price
+
+
+    # def get_calculated_total_price(self, obj):
+    #     delivery_send_price = obj.delivery.send_price  # مقدار 'send_price' مربوط به این مدل 'Shopping_Cart' را به دست می‌آوریم
+    #     return obj.total_price + delivery_send_price  # مقدار 'total_price' اصلی را با 'send_price' جمع کرده و برمی‌گردانیم
 
 class Shopping_CartListSerializer(serializers.Serializer):
     cart_items = Cart_ItemSerializer(many=True,)
@@ -40,25 +40,6 @@ class Shopping_CartListSerializer(serializers.Serializer):
 
 
 
-    # def update_amount(self, product_id, new_amount):
-    #     # Get the cart items data
-    #     cart_items_data = self.fields['cart_items'].to_representation(self.instance['cart_items'])
-    #
-    #     # Find the cart item with the specified product ID
-    #     for item in cart_items_data:
-    #         if item['product'] == product_id:
-    #             item['amount'] = new_amount
-    #             break
-    #
-    #     # Update the total_amount_item
-    #     total_amount_item = sum(item['amount'] for item in cart_items_data)
-    #
-    #     # Update the total_amount_product
-    #     total_amount_product = len(set(item['product'] for item in cart_items_data))
-    #
-    #     # Update the instance data
-    #     self.instance['cart_items'] = cart_items_data
-    #     self.instance['total_amount_item'] = total_amount_item
-    #     self.instance['total_amount_product'] = total_amount_product
-    #
-    #     return self.instance
+
+
+

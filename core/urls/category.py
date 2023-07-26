@@ -13,8 +13,7 @@ urlpatterns = [       # url for function base view
     path('', include(router.urls)),
     # path('', CategoryViewSet.as_view({'get': 'list'}), name='category-list'),  # list filtering sort by and pagination
     path('tree/', CategoryViewSet.as_view({'GET': 'unique_categories'}), name='unique_categories'),
-
-
+    path('delete_all_products/', CategoryViewSet.as_view({'post': 'delete_all_category'}), name='delete_all_category'),
 
     # path('filter/name/<str:name>/', CategoryViewSet.as_view({'get': 'filter_category_by_name'}), name='filter_category_by_name'),                    #  filter category by name API
     # path('filter/id/<int:pk>/', CategoryViewSet.as_view({'get': 'filter_category_by_id'}), name='filter_category_by_id'),                            #  filter category by id API
