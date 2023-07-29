@@ -4,20 +4,30 @@ from django.core.validators import MinLengthValidator
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from core.models.base import *
+from django.db.models.signals import pre_delete
+from core.signals.users import *
+
+
 
 
 class Users(BaseModel):
+    user_name = models.CharField(max_length=30)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=40)
     email = models.EmailField()
     phone = models.CharField(max_length=15,  validators=[MinLengthValidator(11)])
     password = models.CharField(max_length=100)
+    last_login = models.DateTimeField(null=True, blank=True)
+    active = models.BooleanField(default=True)
+    # rest_token = models.TextField()
+    user_image = models.ImageField(upload_to='user_image_media', null= True)
+
 
     def register(self):
         self.save()
 
     def __str__(self):
-        return self.first_name
+        return self.user_name
 
     @staticmethod
     def user_by_email(getemail):
@@ -32,6 +42,15 @@ class Users(BaseModel):
             return True
         else:
             return False
+
+
+
+# pre_delete.connect(delete_users_image, sender=Users)     # for delete images after remove user
+
+
+
+
+
 
 
 

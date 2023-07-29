@@ -20,6 +20,36 @@ class UsersViewSet(viewsets.ModelViewSet):
     queryset = Users.objects.all()
     serializer_class = UserSerializer
 
+
+    @action(detail=False, methods=['post'])
+    def login(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        try:
+            user = Users.objects.get(email=email)
+            if check_password(password, user.password):
+                serializer = UserSerializer(user)
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
+        except Users.DoesNotExist:
+            return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
+
+
+
+
+    # def create(self, request, *args, **kwargs):
+    #     data = request.data.copy()
+    #     serializer = self.get_serializer(data=data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #
+    #     headers = self.get_success_headers(serializer.data)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    #
+
+
     # def create(self, request, *args, **kwargs):
     #     data = request.data.copy()
     #     password = data.get('password')
@@ -42,36 +72,6 @@ class UsersViewSet(viewsets.ModelViewSet):
     #     headers = self.get_success_headers(serializer.data)
     #     return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
     #
-
-
-    @action(detail=False, methods=['post'])
-    def login(self, request):
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        try:
-            user = Users.objects.get(email=email)
-            if check_password(password, user.password):
-                serializer = UserSerializer(user)
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
-        except Users.DoesNotExist:
-            return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
-
-
-
-
-    def create(self, request, *args, **kwargs):
-        data = request.data.copy()
-        serializer = self.get_serializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
 
 
     # @action(detail=False, methods=['post'])

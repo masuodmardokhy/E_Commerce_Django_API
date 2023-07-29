@@ -20,6 +20,10 @@ class Product(BaseModel):
     available = models.BooleanField(default=True)
     description = models.CharField(max_length=300, blank=True, null=True)
     image = models.ImageField(upload_to='product_media', null= True)
+    color = models.CharField(max_length=30)
+    size = models.CharField(max_length=30)
+
+
 
     def __str__(self):
         return self.name

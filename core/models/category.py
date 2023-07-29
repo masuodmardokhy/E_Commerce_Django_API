@@ -2,9 +2,7 @@ from django.db import models
 from django.utils.timezone import datetime
 from core.models.base import *
 from django.utils.text import slugify
-import re
-
-
+import re   # Regular Expression
 
 
 

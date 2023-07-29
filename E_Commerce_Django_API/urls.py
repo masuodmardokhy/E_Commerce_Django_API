@@ -37,6 +37,9 @@ urlpatterns = [
     # path('sub_category/', include('core.urls.sub_category')),
     path('users/', include('core.urls.users')),
     path('wish_list/', include('core.urls.wish_list')),
+    path('rate/', include('core.urls.rate')),
+    path('address/', include('core.urls.address')),
+    path('comment/', include('core.urls.comment')),
 
     path('api-token-auth/', views.obtain_auth_token) ,
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

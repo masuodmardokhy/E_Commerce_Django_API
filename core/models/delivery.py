@@ -1,5 +1,6 @@
 from django.db import models
 from core.models.base import *
+from core.models.order import *
 
 
 class Delivery(BaseModel):
