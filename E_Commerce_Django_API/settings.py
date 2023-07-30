@@ -40,7 +40,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'core',
-    'cart',
     'rest_framework',
     'rest_framework.authtoken'
 

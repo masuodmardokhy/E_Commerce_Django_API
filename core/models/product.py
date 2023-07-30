@@ -7,8 +7,29 @@ from django.utils.text import slugify
 import re
 
 
-
 class Product(BaseModel):
+    COLOR_CHOICES = (
+        ('', '---'),
+        ('white', 'white'),
+        ('red', 'red'),
+        ('blue', 'blue'),
+        ('green', 'green'),
+        ('yellow', 'yellow'),
+        ('purple', 'purple'),
+        ('orange', 'orange'),
+        ('pink', 'pink'),
+        ('brown', 'brown'),
+        ('gray', 'gray'),
+        ('black', 'black'),
+    )
+    SIZE_CHOICES = (
+        ('', '---'),
+        ('small', 'small'),
+        ('medium', 'medium'),
+        ('large', 'large'),
+        ('Xlarge', 'Xlarge'),
+    )
+
     users = models.ForeignKey(Users, on_delete=models.CASCADE, default=1)
     category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE)
     name = models.CharField(max_length=30)
@@ -20,8 +41,10 @@ class Product(BaseModel):
     available = models.BooleanField(default=True)
     description = models.CharField(max_length=300, blank=True, null=True)
     image = models.ImageField(upload_to='product_media', null= True)
-    color = models.CharField(max_length=30)
-    size = models.CharField(max_length=30)
+    color = models.CharField(max_length=30, choices=COLOR_CHOICES, blank=True, null=True, default=None)
+    size = models.CharField(max_length=30, choices=SIZE_CHOICES, blank=True, null=True, default=None)
+
+
 
 
 

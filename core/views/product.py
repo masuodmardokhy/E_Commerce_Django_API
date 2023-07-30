@@ -17,6 +17,7 @@ class MyPagination(PageNumberPagination):
     max_page_size = 8
 
 
+
 class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -24,6 +25,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, filters.OrderingFilter]
     ordering_fields = ['name', 'create', 'total_price']  # The fields you want to enable ordering on
     search_fields = ['name',]  # The fields you want the search feature to be active on
+
 
     @action(detail=False, methods=['delete'])
     def delete_all_products(self, request):

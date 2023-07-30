@@ -8,8 +8,7 @@ from core.models.order import *
 class Cart_Item(BaseModel):
     user = models.ForeignKey(Users, related_name='user', on_delete=models.CASCADE)
     product = models.OneToOneField(Product, related_name='cart_items_user', on_delete=models.CASCADE)
-    order = models.ForeignKey(Order, related_name='order', on_delete=models.CASCADE)
-    # shopping_cart = models.ForeignKey(Shopping_Cart, related_name='list_cartitem', on_delete=models.CASCADE, default='', null=True)
+    order = models.ForeignKey(Order, related_name='order', on_delete=models.CASCADE, null=True, blank=True)
 
     name = models.CharField(max_length=40)
     amount = models.PositiveIntegerField(default=1)
