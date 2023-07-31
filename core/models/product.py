@@ -5,6 +5,28 @@ from core.models.users import *
 from core.models.category import *
 from django.utils.text import slugify
 import re
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFit
+
+
+
+
+
+#
+# class ProductImage(models.Model):
+#     product = models.ForeignKey('Product', related_name='product_productimage', on_delete=models.CASCADE)
+#     image = models.ImageField(upload_to='product_media', null=True)
+#
+#     def __str__(self):
+#         return f"{self.product.name} - Image {self.id}"
+#
+
+class ProductImage(models.Model):
+    product = models.ForeignKey('Product', related_name='product_productimage', on_delete=models.CASCADE, null=True, blank=True)
+    image = models.ImageField(upload_to='product_media', null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.product.name} - Image {self.id}"
 
 
 class Product(BaseModel):
@@ -27,11 +49,12 @@ class Product(BaseModel):
         ('small', 'small'),
         ('medium', 'medium'),
         ('large', 'large'),
-        ('Xlarge', 'Xlarge'),
+        ('Xـlarge', 'Xـlarge'),
     )
 
-    users = models.ForeignKey(Users, on_delete=models.CASCADE, default=1)
-    category = models.ForeignKey(Category, related_name='products', on_delete=models.CASCADE)
+    users = models.ForeignKey(Users, on_delete=models.CASCADE, default=1, related_name='user_product')
+    category = models.ForeignKey(Category, related_name='category_product', on_delete=models.CASCADE)
+
     name = models.CharField(max_length=30)
     slug = models.SlugField(allow_unicode=True, unique=True, null=True, blank=True)
     amount = models.PositiveIntegerField(default=1)
@@ -40,12 +63,9 @@ class Product(BaseModel):
     total_price = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=True)
     description = models.CharField(max_length=300, blank=True, null=True)
-    image = models.ImageField(upload_to='product_media', null= True)
+    images = models.ManyToManyField('ProductImage', blank=True, related_name='images_product')
     color = models.CharField(max_length=30, choices=COLOR_CHOICES, blank=True, null=True, default=None)
     size = models.CharField(max_length=30, choices=SIZE_CHOICES, blank=True, null=True, default=None)
-
-
-
 
 
     def __str__(self):
@@ -70,7 +90,6 @@ def persian_slugify(value):   # for create slug field with persian language
     return slugify(value, allow_unicode=True)    # Convert name to slug
 
 
-
     # @staticmethod
     # def products_by_id(id):
     #     return Product.objects.filter(category_id=id)
@@ -80,7 +99,5 @@ def persian_slugify(value):   # for create slug field with persian language
     #     if self.image:
     #         return self.image.url
     #     return None
-
-
 
 

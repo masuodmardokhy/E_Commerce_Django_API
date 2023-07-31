@@ -4,8 +4,8 @@ from core.models.product import *
 from core.models.base import *
 
 class Comment(BaseModel):
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='user_comment')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE,  related_name='user_product')
     comment = models.TextField()
 
 

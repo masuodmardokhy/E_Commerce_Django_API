@@ -5,8 +5,8 @@ from core.models.product import *
 
 
 class Rate(BaseModel):
-    user = models.ForeignKey(Users, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='user_rate')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='product_rate')
     rate = models.PositiveIntegerField()
 
 

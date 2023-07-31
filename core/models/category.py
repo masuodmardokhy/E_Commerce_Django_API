@@ -2,11 +2,14 @@ from django.db import models
 from django.utils.timezone import datetime
 from core.models.base import *
 from django.utils.text import slugify
-import re   # Regular Expression
+from core.models.users import *
+import re   # Regular Expression to be tidy slug
+
 
 
 
 class Category(BaseModel):
+    users = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='users_category')
     name = models.CharField(max_length=50)
     slug = models.SlugField(allow_unicode=True, unique=True, null=True, blank=True)
     image = models.ImageField(upload_to='category_media', null=True, blank=True)

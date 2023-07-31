@@ -7,8 +7,8 @@ from core.models.delivery import *
 
 
 class Order(BaseModel):
-    user = models.OneToOneField(Users, on_delete=models.CASCADE)
-    delivery = models.OneToOneField(Delivery,  related_name='order', on_delete=models.CASCADE)
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='user_order')
+    delivery = models.OneToOneField(Delivery,  related_name='delivery_order', on_delete=models.CASCADE)
 
     name = models.CharField(max_length=30)
     total_price = models.PositiveIntegerField()
