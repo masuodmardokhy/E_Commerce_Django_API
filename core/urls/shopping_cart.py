@@ -18,7 +18,9 @@ urlpatterns = [
     path('<int:id>/a', Shopping_CartViewSet.as_view({'patch': 'update_amount'}), name='update_amount'),
     path('item_clear/<int:id>', Shopping_CartViewSet.as_view({'post': 'item_clear'}), name='item_clear'),
 
-    path('price-delivery/<int:user_id>/', TotalPriceView.as_view(), name='get_total_price'),
+
+    path('TotalpriceAndDelivery/<int:user_id>/<int:shopping_cart_id>/<int:delivery_id>/', Shopping_CartViewSet.as_view({'get': 'get_cart_with_prices'}), name='get_cart_with_prices'),
+
 
 ]
 urlpatterns += router.urls

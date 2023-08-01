@@ -51,7 +51,7 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
             # Create a dictionary to store the data for the cart_items field
             cart_items_data = {
                 'user': user_id,
-                'items': calculated_results['cart_items'],
+                'cart_items': calculated_results['cart_items'],
                 'total_price': calculated_results['total_price'],
                 'total_amount_item': calculated_results['total_amount_item'],
                 'total_amount_product': calculated_results['total_amount_product']
@@ -64,29 +64,76 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
             shopping_cart, _ = Shopping_Cart.objects.update_or_create(user_id=user_id,
                                                                       defaults={'cart_items': cart_items_json})
 
+            # به‌روزرسانی فیلدهای total_price، total_amount_item و total_amount_product
+            shopping_cart.total_price = calculated_results['total_price']
+            shopping_cart.total_amount_item = calculated_results['total_amount_item']
+            shopping_cart.total_amount_product = calculated_results['total_amount_product']
+            shopping_cart.save()
+
             return Response(serializer.data)
         except Users.DoesNotExist:
             return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
 
-class TotalPriceView(APIView):
-    def get(self, request, user_id=None):
+    def get_cart_with_prices(self, request, user_id=None, shopping_cart_id=None, delivery_id=None):
         try:
-            if user_id is not None:
-                shopping_cart = Shopping_Cart.objects.get(user_id=user_id)
-                total_price = shopping_cart.total_price
-                send_price = shopping_cart.delivery.send_price
-                calculated_total_price = total_price + send_price
+            # اگر user_id ارسال شده است، مدل یوزر را به دست بیاوریم
+            if user_id:
+                shopping_carts = Shopping_Cart.objects.filter(user_id=user_id)
+                if not shopping_carts.exists():
+                    return Response("This user's shopping cart is empty", status=status.HTTP_404_NOT_FOUND)
 
-                response_data = {
-                    'total_price': total_price,
-                    'send_price': send_price,
-                    'calculated_total_price': calculated_total_price
-                }
-                return Response(response_data)
+                total_price_with_send_price = 0
+
+                shopping_cart = Shopping_Cart.objects.get(pk=shopping_cart_id)
+                total_price = shopping_cart.total_price
+
+                delivery = Delivery.objects.get(pk=delivery_id)
+                send_price = delivery.send_price
+
+                for cart in shopping_carts:
+                    total_price_with_send_price = total_price + send_price
+
+                return Response({
+                    "user_id": user_id,
+                    "total_price ": total_price,
+                    "send_price": send_price,
+                    "total_price_with_send_price": total_price_with_send_price,
+                })
             else:
-                return Response("Enter user_id to get the total price.", status=status.HTTP_404_NOT_FOUND)
+                return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
         except Shopping_Cart.DoesNotExist:
-            return Response("Shopping Cart not found for this user.", status=status.HTTP_404_NOT_FOUND)
+            return Response("Invalid shopping cart ID", status=status.HTTP_400_BAD_REQUEST)
+
+
+    # def get_cart_with_prices(self, request,user_id=None, shopping_cart_id=None, delivery_id=None):
+    #     try:
+    #         # دریافت مدل Shopping_Cart با shopping_cart_id
+    #         shopping_cart = Shopping_Cart.objects.get(pk=shopping_cart_id)
+    #         total_price = shopping_cart.total_price
+
+    #         # دریافت مدل Delivery با delivery_id
+    #         delivery = Delivery.objects.get(pk=delivery_id)
+    #         send_price = delivery.send_price
+    #
+    #         # محاسبه مقدار total_price_with_send_price
+    #         total_price_with_send_price = total_price + send_price
+    #
+    #         # سایر عملیات و کدهای خود را انجام دهید...
+    #
+    #         return Response({
+    #             "total_price": total_price,
+    #             "send_price": send_price,
+    #             "total_price_with_send_price": total_price_with_send_price,
+    #             # دیگر اطلاعات مربوط به shopping_cart و delivery را اضافه کنید
+    #         })
+    #     except Shopping_Cart.DoesNotExist:
+    #         return Response("Invalid shopping cart ID", status=status.HTTP_400_BAD_REQUEST)
+    #     except Delivery.DoesNotExist:
+    #         return Response("Invalid delivery ID", status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
 
 
 

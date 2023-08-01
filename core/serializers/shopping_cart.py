@@ -4,20 +4,13 @@ from core.serializers.cart_item import Cart_ItemSerializer
 
 class Shopping_CartSerializer(serializers.ModelSerializer):
     cart_items = Cart_ItemSerializer(many=True, read_only=True)
-    calculated_total_price = serializers.SerializerMethodField()
 
     class Meta:
         model = Shopping_Cart
-        fields = ['id', 'user', 'delivery', 'total_price', 'total_amount_item', 'total_amount_product', 'calculated_total_price', 'cart_items' ]
+        fields = ['id', 'user', 'total_price', 'total_amount_item', 'total_amount_product', 'cart_items' ]
+    def get_total_price_with_send_price(self, obj):
+        return obj['total_price'] + obj['send_price']
 
-
-    # def get_calculated_total_price(self, instance):
-    #     return instance.total_price
-
-
-    # def get_calculated_total_price(self, obj):
-    #     delivery_send_price = obj.delivery.send_price  # مقدار 'send_price' مربوط به این مدل 'Shopping_Cart' را به دست می‌آوریم
-    #     return obj.total_price + delivery_send_price  # مقدار 'total_price' اصلی را با 'send_price' جمع کرده و برمی‌گردانیم
 
 class Shopping_CartListSerializer(serializers.Serializer):
     cart_items = Cart_ItemSerializer(many=True,)
@@ -37,7 +30,6 @@ class Shopping_CartListSerializer(serializers.Serializer):
     def get_total_amount_item(self, obj):
         cart_items_data = self.fields['cart_items'].to_representation(obj['cart_items'])
         return len(cart_items_data)
-
 
 
 
