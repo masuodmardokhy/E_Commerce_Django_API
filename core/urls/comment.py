@@ -10,4 +10,8 @@ app_name = 'comment'
 
 urlpatterns = [   # url for function base view
    path('', include(router.urls)),
+
+   path('Comment-By-product/<int:product_id>/', CommentViewSet.as_view({'get': 'comments_by_product'}), name='comments_by_product'),
+   path('Comment-By-user/<int:user_id>/', CommentViewSet.as_view({'get': 'comments_by_user'}), name='comments_by_user'),
+
 ]

@@ -9,9 +9,6 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFit
 
 
-
-
-
 #
 # class ProductImage(models.Model):
 #     product = models.ForeignKey('Product', related_name='product_productimage', on_delete=models.CASCADE)
@@ -21,12 +18,11 @@ from imagekit.processors import ResizeToFit
 #         return f"{self.product.name} - Image {self.id}"
 #
 
-class ProductImage(models.Model):
-    product = models.ForeignKey('Product', related_name='product_productimage', on_delete=models.CASCADE, null=True, blank=True)
-    image = models.ImageField(upload_to='product_media', null=True, blank=True)
-
-    def __str__(self):
-        return f"{self.product.name} - Image {self.id}"
+# class ProductImage(models.Model):
+#     image = models.ImageField(upload_to='product_media',blank=True, null=True)
+#
+#     def __str__(self):
+#         return f"Product Image ID: {self.id}"
 
 
 class Product(BaseModel):
@@ -63,7 +59,7 @@ class Product(BaseModel):
     total_price = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=True)
     description = models.CharField(max_length=300, blank=True, null=True)
-    images = models.ManyToManyField('ProductImage', blank=True, related_name='images_product')
+    images = models.JSONField(null=True, blank=True)
     color = models.CharField(max_length=30, choices=COLOR_CHOICES, blank=True, null=True, default=None)
     size = models.CharField(max_length=30, choices=SIZE_CHOICES, blank=True, null=True, default=None)
 

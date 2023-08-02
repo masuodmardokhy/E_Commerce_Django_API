@@ -10,6 +10,7 @@ app_name = 'rate'
 
 urlpatterns = [   # url for function base view
    path('', include(router.urls)),
-
+   path('rate_by_product/<int:product_id>/', RateViewSet.as_view({'get': 'rate_by_product'}), name='rate_by_product'),
+   path('rate_by_user/<int:user_id>/', RateViewSet.as_view({'get': 'rate_by_user'}), name='rate_by_user'),
 
 ]

@@ -10,6 +10,6 @@ app_name = 'address'
 
 urlpatterns = [   # url for function base view
    path('', include(router.urls)),
-
+   path('address_by_user/<int:user_id>/', AddressViewSet.as_view({'get': 'address_by_user'}), name='address_by_user'),
 
 ]

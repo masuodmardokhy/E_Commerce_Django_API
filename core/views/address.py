@@ -7,6 +7,9 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from core.models.address import *
 from core.serializers.address import *
+from django.shortcuts import get_object_or_404
+
+
 
 class MyPagination(PageNumberPagination):
     page_size_query_param = 'size'
@@ -18,5 +21,27 @@ class AddressViewSet(viewsets.ModelViewSet):
     serializer_class = AddressSerializer
     pagination_class = MyPagination
     filter_backends = [SearchFilter, filters.OrderingFilter]
-    ordering_fields = ['name', 'create']  # The fields you want to enable ordering on
-    search_fields = ['name', ]  # The fields you want the search feature to be active on
+    ordering_fields = ['create']  # The fields you want to enable ordering on
+    search_fields = ['city', 'stat' ]  # The fields you want the search feature to be active on
+
+
+    @action(detail=False, methods=['get'])
+    def address_by_user(self, request, user_id=None):
+        try:
+            # find user by user_id , get_object_or_404 is for Retrieve a record from the database
+            user = get_object_or_404(Users, id=user_id)
+
+            address = Address.objects.filter(user=user)  # We filter all address by user
+            if not address.exists():
+                return Response("There is a user, but there are no address for this user.",
+                                status=status.HTTP_404_NOT_FOUND)
+
+            serializer = AddressSerializer(address, many=True)
+            return Response(serializer.data)
+
+        except Users.DoesNotExist:
+            return Response("There is no user with this ID.", status=status.HTTP_404_NOT_FOUND)
+
+        # In case of another error
+        except Exception as e:
+            return Response("The user ID is invalid.", status=status.HTTP_400_BAD_REQUEST)

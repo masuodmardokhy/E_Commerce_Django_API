@@ -43,8 +43,8 @@ class Cart_ItemViewSet(viewsets.ModelViewSet):
 
 
     def create(self, request, pk=None):
-        product = Product.objects.get(pk=pk)  # دریافت محصول با استفاده از شناسه
-        user_id = request.data.get('user_id')  # دریافت شناسه کاربر از بدنه درخواست
+        product = Product.objects.get(pk=pk)
+        user_id = request.data.get('user_id')
 
         try:
             user = Users.objects.get(id=user_id)
