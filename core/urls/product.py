@@ -14,6 +14,8 @@ urlpatterns = [   # url for function base view
 
    path('add_to_cart/<int:user_id>/<int:pk>/', ProductViewSet.as_view({'post': 'add_to_cart'}), name='add_to_cart'),
    path('delete_all_products/', ProductViewSet.as_view({'post': 'delete_all_products'}), name='delete_all_products'),
+   path('add_to_wishlist/<int:user_id>/<int:pk>/', ProductViewSet.as_view({'post': 'add_to_wishlist'}), name='add_to_wishlist'),
+
 
 
 
@@ -21,7 +23,6 @@ urlpatterns = [   # url for function base view
    # path('sort_filter_form', ProductViewSet.as_view({'get': 'sort_filter_form'}), name='sort_filter_form'), # list filtering sort by and pagination
     # # path('sort_filter', ProductViewSet.as_view({'get': 'sort_filter'}), name='sort_filter'), # list filtering sort by and pagination
     # path('sort_filter/', ProductViewSet.sort_filter, name='sort_filter'),
-
 
 
    #  path('filter/name/<str:name>/', ProductViewSet.as_view({'get': 'filter_product_by_name'}),

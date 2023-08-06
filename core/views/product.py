@@ -9,7 +9,8 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from core.models.users import *
 from core.models.cart_item import *
-
+from core.models.wish_list import *
+from core.serializers.wish_list import *
 
 
 class MyPagination(PageNumberPagination):
@@ -59,6 +60,27 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return Response("Added to cart successfully", status=status.HTTP_200_OK)
 
+    @action(detail=True, methods=['post'], url_path='add-to-wishlist')
+    def add_to_wishlist(self, request, pk=None, user_id=None):
+        product = self.get_object()
+
+        try:
+            user = Users.objects.get(id=user_id)
+
+            # بررسی اینکه آیا محصول در لیست علاقه‌مندی‌های کاربر وجود دارد یا خیر
+            if Wish_List.objects.filter(users=user, product=product).exists():
+                return Response("The product is already in the wishlist.", status=status.HTTP_409_CONFLICT)
+
+            # اضافه کردن محصول به لیست علاقه‌مندی‌ها
+            wishlist_item = Wish_List.objects.create(users=user, product=product)
+            serializer = Wish_ListSerializer(wishlist_item)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Users.DoesNotExist:
+            return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
+
+        # except Exception as e:
+        #     return Response("An error occurred.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
     def list(self, request):
