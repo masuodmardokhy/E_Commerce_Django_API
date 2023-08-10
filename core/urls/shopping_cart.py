@@ -19,7 +19,7 @@ urlpatterns = [
     path('item_clear/<int:id>', Shopping_CartViewSet.as_view({'post': 'item_clear'}), name='item_clear'),
 
 
-    path('TotalpriceAndDelivery/<int:user_id>/<int:shopping_cart_id>/<int:delivery_id>/', Shopping_CartViewSet.as_view({'get': 'get_cart_with_prices'}), name='get_cart_with_prices'),
+    path('TotalpriceAndDelivery/<int:user_id>/<int:shopping_cart_id>/<int:delivery_id>/', Shopping_CartViewSet.as_view({'get': 'get_shoppingcart_with_sendprice'}), name='get_shoppingcart_with_sendprice'),
 
 
 ]

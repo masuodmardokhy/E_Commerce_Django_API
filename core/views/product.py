@@ -13,6 +13,8 @@ from core.models.wish_list import *
 from core.serializers.wish_list import *
 
 
+
+
 class MyPagination(PageNumberPagination):
     page_size_query_param = 'size'
     max_page_size = 8
@@ -60,6 +62,7 @@ class ProductViewSet(viewsets.ModelViewSet):
 
         return Response("Added to cart successfully", status=status.HTTP_200_OK)
 
+
     @action(detail=True, methods=['post'], url_path='add-to-wishlist')
     def add_to_wishlist(self, request, pk=None, user_id=None):
         product = self.get_object()
@@ -67,11 +70,11 @@ class ProductViewSet(viewsets.ModelViewSet):
         try:
             user = Users.objects.get(id=user_id)
 
-            # بررسی اینکه آیا محصول در لیست علاقه‌مندی‌های کاربر وجود دارد یا خیر
+            # Checking if the product is in the user's wish list or not
             if Wish_List.objects.filter(users=user, product=product).exists():
                 return Response("The product is already in the wishlist.", status=status.HTTP_409_CONFLICT)
 
-            # اضافه کردن محصول به لیست علاقه‌مندی‌ها
+            # Add product to wish list
             wishlist_item = Wish_List.objects.create(users=user, product=product)
             serializer = Wish_ListSerializer(wishlist_item)
             return Response(serializer.data, status=status.HTTP_201_CREATED)

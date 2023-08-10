@@ -2,18 +2,17 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status                       # for show messages
 from rest_framework import viewsets , permissions       # viewsets for class base view
-from core.models.shopping_cart import *                     # * it means all
-from core.models.cart_item import Cart_Item                     # * it means all
-from core.serializers.cart_item import *
-from core.serializers.users import *
-from core.serializers.shopping_cart import *
-from core.models.order import Order
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from django.core.serializers.json import DjangoJSONEncoder
 import json
-from rest_framework.views import APIView
+from core.models.cart_item import Cart_Item                     # * it means all
+from core.serializers.cart_item import *
+from core.serializers.users import *
+from core.serializers.shopping_cart import *
+from core.models.order import Order
+from core.models.delivery import *
 
 
 
@@ -74,7 +73,9 @@ class Shopping_CartViewSet(viewsets.ModelViewSet):
         except Users.DoesNotExist:
             return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
 
-    def get_cart_with_prices(self, request, user_id=None, shopping_cart_id=None, delivery_id=None):
+
+
+    def get_shoppingcart_with_sendprice(self, request, user_id=None, shopping_cart_id=None, delivery_id=None):
         try:
             if user_id:
                 shopping_carts = Shopping_Cart.objects.filter(user_id=user_id)

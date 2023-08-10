@@ -36,8 +36,8 @@ class Product(BaseModel):
         ('Xـlarge', 'Xـlarge'),
     )
 
-    users = models.ForeignKey(Users, on_delete=models.CASCADE, default=1, related_name='user_product')
-    category = models.ForeignKey(Category, related_name='category_product', on_delete=models.CASCADE)
+    user = models.ForeignKey('Users', on_delete=models.CASCADE, default=1, related_name='users_product')
+    category = models.ForeignKey('Category', related_name='category_product', on_delete=models.CASCADE)
 
     name = models.CharField(max_length=30)
     slug = models.SlugField(allow_unicode=True, unique=True, null=True, blank=True)
@@ -50,6 +50,7 @@ class Product(BaseModel):
     images = models.ImageField(upload_to='product_media', blank=True, null=True)
     color = models.CharField(max_length=30, choices=COLOR_CHOICES, blank=True, null=True, default=None)
     size = models.CharField(max_length=30, choices=SIZE_CHOICES, blank=True, null=True, default=None)
+
 
 
     def __str__(self):
@@ -72,6 +73,9 @@ class Product(BaseModel):
 def persian_slugify(value):   # for create slug field with persian language
     value = re.sub(r'(a(?!([eiou]|$)))|e|i|o|u', '', value, flags=re.IGNORECASE)     # Remove extra words from the name
     return slugify(value, allow_unicode=True)    # Convert name to slug
+
+
+
 
 
     # @staticmethod

@@ -6,7 +6,7 @@ class Address(BaseModel):
     user = models.ForeignKey(Users, related_name='user_addresses', on_delete=models.CASCADE)
     stat = models.CharField(max_length=20)
     city = models.CharField(max_length=50)
-    address = models.CharField(max_length=100)
+    address_home = models.CharField(max_length=100,)
     zipCode = models.CharField(max_length=20)
 
 

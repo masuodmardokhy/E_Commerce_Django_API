@@ -11,7 +11,7 @@ import re   # Regular Expression to be tidy slug
 class Category(BaseModel):
     users = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='users_category')
     name = models.CharField(max_length=50)
-    slug = models.SlugField(allow_unicode=True, unique=True, null=True, blank=True)
+    slug = models.SlugField(allow_unicode=True, null=True, blank=True)
     image = models.ImageField(upload_to='category_media', null=True, blank=True)
     sub = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='subcategories')
 

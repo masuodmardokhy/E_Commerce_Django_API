@@ -1,14 +1,16 @@
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
-from core.models.order import Order
-from core.serializers.order import OrderSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
 from rest_framework.permissions import IsAuthenticated
-
+from core.models.order import Order
+from core.serializers.order import OrderSerializer
+from core.models.shopping_cart import Shopping_Cart
+from core.models.delivery import Delivery
+from core.models.address import *
 
 
 
@@ -26,6 +28,58 @@ class OrderViewSet(ModelViewSet):
     pagination_class = MyPagination
 
 
+    def get_shoppingcart_with_delivery_move_to_order(self, request, user_id=None, shopping_cart_id=None, delivery_id=None, address_id=None):
+        try:
+            shopping_carts = Shopping_Cart.objects.filter(user_id=user_id, id=shopping_cart_id)
+            if not shopping_carts.exists():
+                return Response("This user's shopping cart is empty", status=status.HTTP_404_NOT_FOUND)
+
+            total_price_with_send_price = 0
+
+            shopping_cart = Shopping_Cart.objects.get(pk=shopping_cart_id)
+            total_price = shopping_cart.total_price
+
+            delivery = Delivery.objects.get(pk=delivery_id)
+            send_price = delivery.send_price
+
+            address = Address.objects.get(pk=address_id)
+
+            for cart in shopping_carts:
+                total_price_with_send_price = total_price + send_price
+
+            order = Order(
+                user_id=user_id,
+                shopping_cart=shopping_cart,
+                delivery=delivery,
+                address=address,
+                total_price=total_price,
+                send_price=send_price,
+                total_price_with_send_price=total_price_with_send_price
+            )
+            order.save()
+
+            # shopping_carts.delete()
+
+            return Response({
+
+                "user_id": request.user.id,
+                "total_price": total_price,
+                "send_price": send_price,
+                "total_price_with_send_price": total_price_with_send_price,
+            })
+
+        except Shopping_Cart.DoesNotExist:
+            return Response("Invalid shopping cart ID", status=status.HTTP_400_BAD_REQUEST)
+
+
+    # # این متد را اضافه کنید
+    # def list(self, request, *args, **kwargs):
+    #     return self.get_shoppingcart_with_delivery_move_to_order(request, *args, **kwargs)
+    #
+
+
+
+
 
     # def get_permissions(self):
     #     if self.action in ['create', 'update', 'partial_update', 'destroy']:
@@ -33,64 +87,64 @@ class OrderViewSet(ModelViewSet):
     #     return super(OrderViewSet, self).get_permissions()
 
 
-    def list(self, request):
-        queryset = self.filter_queryset(self.get_queryset())
-
-        # Apply ordering if requested
-        ordering = request.query_params.get('ordering')
-        if ordering in self.ordering_fields:
-            queryset = queryset.order_by(ordering)
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-
-
-
-    def retrieve(self, request, pk=None):
-        queryset = self.get_queryset()
-        order = self.get_object()
-        serializer = self.get_serializer(order)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-    def update(self, request, pk=None):
-        order = self.get_object()
-        serializer = self.get_serializer(order, data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-    def partial_update(self, request, pk=None):
-        order = self.get_object()
-        serializer = self.get_serializer(order, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-    def destroy(self, request, pk=None):
-        try:
-            order = self.get_object()
-            order.delete()
-            return Response(f"Deleted order with ID: {pk}", status=status.HTTP_204_NO_CONTENT)
-        except Order.DoesNotExist:
-            return Response("Order not found", status=status.HTTP_404_NOT_FOUND)
-
-
+    # def list(self, request):
+    #     queryset = self.filter_queryset(self.get_queryset())
+    #
+    #     # Apply ordering if requested
+    #     ordering = request.query_params.get('ordering')
+    #     if ordering in self.ordering_fields:
+    #         queryset = queryset.order_by(ordering)
+    #
+    #     page = self.paginate_queryset(queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True)
+    #         return self.get_paginated_response(serializer.data)
+    #
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     return Response(serializer.data)
+    #
+    #
+    #
+    #
+    # def retrieve(self, request, pk=None):
+    #     queryset = self.get_queryset()
+    #     order = self.get_object()
+    #     serializer = self.get_serializer(order)
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    #
+    #
+    # def create(self, request):
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #
+    #
+    # def update(self, request, pk=None):
+    #     order = self.get_object()
+    #     serializer = self.get_serializer(order, data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    #
+    #
+    # def partial_update(self, request, pk=None):
+    #     order = self.get_object()
+    #     serializer = self.get_serializer(order, data=request.data, partial=True)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_200_OK)
+    #
+    #
+    # def destroy(self, request, pk=None):
+    #     try:
+    #         order = self.get_object()
+    #         order.delete()
+    #         return Response(f"Deleted order with ID: {pk}", status=status.HTTP_204_NO_CONTENT)
+    #     except Order.DoesNotExist:
+    #         return Response("Order not found", status=status.HTTP_404_NOT_FOUND)
+    #
+    #
 
 
 
