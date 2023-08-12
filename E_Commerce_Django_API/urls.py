@@ -40,6 +40,7 @@ urlpatterns = [
     path('rate/', include('core.urls.rate')),
     path('address/', include('core.urls.address')),
     path('comment/', include('core.urls.comment')),
+    path('feedback/', include('core.urls.like_dislike')),
 
     path('api-token-auth/', views.obtain_auth_token) ,
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),

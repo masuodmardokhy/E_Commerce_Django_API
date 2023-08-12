@@ -36,7 +36,7 @@ class Product(BaseModel):
         ('Xـlarge', 'Xـlarge'),
     )
 
-    user = models.ForeignKey('Users', on_delete=models.CASCADE, default=1, related_name='users_product')
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, default=1, related_name='users_product')
     category = models.ForeignKey('Category', related_name='category_product', on_delete=models.CASCADE)
 
     name = models.CharField(max_length=30)
