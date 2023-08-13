@@ -11,8 +11,8 @@ from core.models.users import *
 from core.models.cart_item import *
 from core.models.wish_list import *
 from core.serializers.wish_list import *
-
-
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework import viewsets, parsers
 
 
 class MyPagination(PageNumberPagination):
@@ -28,6 +28,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter, filters.OrderingFilter]
     ordering_fields = ['name', 'create', 'total_price']  # The fields you want to enable ordering on
     search_fields = ['name',]  # The fields you want the search feature to be active on
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser) #Parsers for parsing data uploaded from HTTP requests
+
 
 
     @action(detail=False, methods=['delete'])
@@ -109,22 +111,20 @@ class ProductViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-    def create(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        product_serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if product_serializer.is_valid():
+            product = product_serializer.save()
 
+            # اضافه کردن تصاویر به محصول
+            images = request.FILES.getlist('images')
+            for image in images:
+                product_image = ProductImage.objects.create(product=product, image=image)
 
-    def update(self, request, pk=None):
-        product = self.get_object()
-        serializer = self.get_serializer(product, data=request.data,
-                                         partial=True)  # partial = True, This means that only the part of the data that needs to be updated
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(product_serializer.data)
+        return Response(product_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
     def partial_update(self, request, pk=None):

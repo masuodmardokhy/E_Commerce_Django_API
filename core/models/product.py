@@ -10,7 +10,12 @@ from django.db import models
 
 
 
+class ProductImage(BaseModel):
+    product = models.ForeignKey('Product', on_delete=models.CASCADE,related_name='product_productimage')
+    image = models.ImageField(upload_to='product_media')
 
+    def __str__(self):
+        return self.product
 
 
 class Product(BaseModel):
@@ -47,14 +52,13 @@ class Product(BaseModel):
     total_price = models.PositiveIntegerField(default=0)
     available = models.BooleanField(default=True)
     description = models.CharField(max_length=300, blank=True, null=True)
-    images = models.ImageField(upload_to='product_media', blank=True, null=True)
     color = models.CharField(max_length=30, choices=COLOR_CHOICES, blank=True, null=True, default=None)
     size = models.CharField(max_length=30, choices=SIZE_CHOICES, blank=True, null=True, default=None)
 
 
 
     def __str__(self):
-        return self.name
+        return "%s" % (self.name)
 
     @property
     def calculate_total_price(self):   # Property to calculate the total price
