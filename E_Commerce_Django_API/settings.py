@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta # for SIMPLE_JWT
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -39,12 +40,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    'core',
-    'imagekit',
+    "core",
     'rest_framework',
-    'rest_framework.authtoken'
-
-
+    # 'rest_framework.authtoken'
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -100,24 +99,27 @@ DATABASES = {
 
 
 
-
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
 
     ],
 }
 
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': '1221',
+    'AUTH_HEADER_TYPES': ('Bearer',)   # Authentication header type (usually 'Bearer')
+}
 
-# REST_FRAMEWORK = {
-#     'DEFAULT_PERMISSION_CLASSES': [],
-#
-#     'DEFAULT_AUTHENTICATION_CLASSES': [],
-# }
-# AUTHENTICATION_BACKENDS = ('django.contrib.auth.backends.AllowAllUsersModelBackend', )
 
 
 'cart.context_processor.cart_total_amount'

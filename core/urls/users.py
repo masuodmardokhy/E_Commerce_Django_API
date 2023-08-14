@@ -8,6 +8,7 @@ router = routers.DefaultRouter()   # url for class base view
 router.register(r'', UsersViewSet, basename='user_view_set' )
 
 
+app_name = "Users"
 
 urlpatterns = [   # url for function base view
    path('', include(router.urls)),

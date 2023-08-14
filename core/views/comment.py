@@ -8,7 +8,9 @@ from rest_framework import filters
 from core.models.comment import *
 from core.serializers.comment import *
 from django.shortcuts import get_object_or_404
-
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 
 
 
@@ -25,7 +27,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     ordering_fields = [ 'create']  # The fields you want to enable ordering on
     search_fields = []  # The fields you want the search feature to be active on
 
-
+    @authentication_classes([JWTAuthentication])  # Authenticate with JWT
+    @permission_classes([IsAuthenticated])  # Allow access for logged in users
     @action(detail=False, methods=['get'])
     def comments_by_product(self, request, product_id=None):
         try:
