@@ -40,11 +40,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    "core",
+    'core',
     'rest_framework',
     # 'rest_framework.authtoken'
     'rest_framework_simplejwt',
 ]
+# AUTH_USER_MODEL = "core.models.user.Users"
+AUTH_USER_MODEL = "core.users"
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -55,7 +58,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
 
 
 ROOT_URLCONF = 'E_Commerce_Django_API.urls'
