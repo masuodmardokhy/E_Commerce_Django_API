@@ -1,3 +1,6 @@
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status                       # for show messages
@@ -8,9 +11,7 @@ from rest_framework import filters
 from core.models.comment import *
 from core.serializers.comment import *
 from django.shortcuts import get_object_or_404
-from rest_framework.decorators import authentication_classes, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
+
 
 
 
@@ -19,6 +20,8 @@ class MyPagination(PageNumberPagination):
     max_page_size = 5
 
 
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticatedOrReadOnly])
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
@@ -27,8 +30,44 @@ class CommentViewSet(viewsets.ModelViewSet):
     ordering_fields = [ 'create']  # The fields you want to enable ordering on
     search_fields = []  # The fields you want the search feature to be active on
 
-    @authentication_classes([JWTAuthentication])  # Authenticate with JWT
-    @permission_classes([IsAuthenticated])  # Allow access for logged in users
+
+
+    def list(self, request, *args, **kwargs):
+        comments = self.queryset
+        serializer = self.serializer_class(comments, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    # @authentication_classes([JWTAuthentication])  # Authenticate with JWT
+    # @permission_classes([AllowAny,])  # Allow access for logged in users
+    def create(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def retrieve(self, request, pk=None, *args, **kwargs):
+        comment = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(comment)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+    def update(self, request, pk=None, *args, **kwargs):
+        comment = get_object_or_404(self.queryset, pk=pk)
+        serializer = self.serializer_class(comment, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def destroy(self, request, pk=None, *args, **kwargs):
+        comment = get_object_or_404(self.queryset, pk=pk)
+        comment.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
     @action(detail=False, methods=['get'])
     def comments_by_product(self, request, product_id=None):
         try:

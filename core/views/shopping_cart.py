@@ -1,3 +1,6 @@
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.decorators import action, authentication_classes, permission_classes
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status                       # for show messages
@@ -20,7 +23,8 @@ class MyPagination(PageNumberPagination):
     page_size_query_param = 'size'
     max_page_size = 5
 
-
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 class Shopping_CartViewSet(viewsets.ModelViewSet):
     queryset = Shopping_Cart.objects.all()
     serializer_class = Shopping_CartSerializer

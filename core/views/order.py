@@ -1,3 +1,6 @@
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.decorators import action, authentication_classes, permission_classes
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.decorators import action
 from rest_framework import status
@@ -19,6 +22,8 @@ class MyPagination(PageNumberPagination):
     max_page_size = 5
 
 
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 class OrderViewSet(ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
@@ -76,9 +81,6 @@ class OrderViewSet(ModelViewSet):
     # def list(self, request, *args, **kwargs):
     #     return self.get_shoppingcart_with_delivery_move_to_order(request, *args, **kwargs)
     #
-
-
-
 
 
     # def get_permissions(self):
