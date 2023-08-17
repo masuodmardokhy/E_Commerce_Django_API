@@ -1,3 +1,6 @@
+from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, IsAdminUser
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -7,9 +10,15 @@ from django.contrib.auth.hashers import make_password
 from core.models.users import *
 from core.serializers.users import *
 
+
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 class UsersViewSet(viewsets.ModelViewSet):
     queryset = Users.objects.all()
     serializer_class = UserSerializer
+
+    # def perform_create(self, serializer):
+    #     serializer.save(password=make_password(serializer.validated_data['password']))
 
     def create(self, request):
         serializer = self.serializer_class(data=request.data)
@@ -22,6 +31,8 @@ class UsersViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+    @authentication_classes([JWTAuthentication])
+    @permission_classes([])
     @action(detail=False, methods=['post'])
     def login(self, request):
         email = request.data.get('email')
@@ -38,6 +49,8 @@ class UsersViewSet(viewsets.ModelViewSet):
                 return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
         except Users.DoesNotExist:
             return Response("Invalid email or password", status=status.HTTP_401_UNAUTHORIZED)
+
+
 
     @action(detail=False, methods=['post'])
     def logout(self, request):
