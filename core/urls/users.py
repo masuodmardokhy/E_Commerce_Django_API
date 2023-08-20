@@ -4,25 +4,16 @@ from rest_framework import routers
 from core.views.users import *
 
 
-router = routers.DefaultRouter()   # url for class base view
-router.register(r'', UsersViewSet, basename='user_view_set' )
-
-
 app_name = "Users"
 
-urlpatterns = [   # url for function base view
-   path('', include(router.urls)),
-   path('login/', UsersViewSet.as_view({'post': 'login'}), name='login'),
-   path('logout/', UsersViewSet.as_view({'post': 'logout'}), name='logout'),
-
-
-   path('filter/name/<str:name>/', UsersViewSet.as_view({'get': 'filter_user_by_name'}), name='filter_user_by_id'),  # filter user by name API
-   path('filter/id/<int:pk>/', UsersViewSet.as_view({'get': 'filter_user_by_id'}),name='filter_user-by-id'),  # filter user by id API
-   # path('sign_in/', UsersViewSet.as_view({'get': 'user_sign_in'}),name='user_sign_in'),  # user sign in API
-   # path('sign_out/', UsersViewSet.as_view({'get': 'user_sign_out'}),name='user_sign_out'),  # user sign out API
-
-
+urlpatterns = [
+    path('create/', UserRegistrationView.as_view(), name='user-register'),
+    path('', UserListView.as_view(), name='user-list'),
+    path('update/', UserProfileUpdateView.as_view(), name='user-profile-update'),
+    path('login/', UserLoginView.as_view(), name='user-login'),
+    path('profile/', UserProfileView.as_view(), name='user-profile'),
+    path('<int:user_id>/', UserDetailView.as_view(), name='user-detail'),
+    path('logout/', UserLogoutView.as_view(), name='user-logout'),
+    path('promote-to-admin/<int:user_id>/', PromoteToAdminView.as_view(), name='promote-to-admin'),
 
 ]
-
-urlpatterns += router.urls
