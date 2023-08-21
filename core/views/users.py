@@ -1,6 +1,10 @@
 from tokenize import TokenError
+
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.db.models import Q
 from django.contrib.auth import authenticate
+from django.utils.http import urlsafe_base64_encode
+from jwt.utils import force_bytes
 from rest_framework.decorators import authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated, IsAdminUser
 from rest_framework.views import APIView
@@ -15,23 +19,11 @@ from core.models.users import *
 from core.serializers.users import *
 
 
-# class UserRegistrationView(APIView):
-#     def post(self, request):
-#         serializer = UserSerializer(data=request.data)  # Replace YourUserSerializer with your actual serializer
-#         if serializer.is_valid():
-#             user = serializer.save(password=make_password(serializer.validated_data['password']))
-#             refresh = RefreshToken.for_user(user)
-#             access_token = refresh.access_token
-#             return Response({'access_token': str(access_token), 'refresh_token': str(refresh), 'user': serializer.data},
-#                             status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class UserRegistrationView(APIView):
     def post(self, request):
-        serializer = UserRegistrationSerializer(data=request.data)
+        serializer = UserSerializer(data=request.data)  # Replace YourUserSerializer with your actual serializer
         if serializer.is_valid():
-            user = serializer.save()
+            user = serializer.save(password=make_password(serializer.validated_data['password']))
             refresh = RefreshToken.for_user(user)
             access_token = refresh.access_token
             return Response({'access_token': str(access_token), 'refresh_token': str(refresh), 'user': serializer.data},
@@ -39,12 +31,13 @@ class UserRegistrationView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+
+
+
 class UserListView(APIView):
     permission_classes = [IsAdminUser]  # Require admin permission for access
-
     def get(self, request):
         queryset = Users.objects.all()
-
         # Filtering based on query parameters
         is_admin = request.query_params.get('is_admin')
         first_name = request.query_params.get('first_name')
@@ -71,6 +64,8 @@ class UserListView(APIView):
         serializer = UserSerializer(queryset, many=True)
         return Response(serializer.data)
 
+
+
 class UserProfileUpdateView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -85,6 +80,24 @@ class UserProfileUpdateView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class UserChangePasswordView(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        user = request.user
+        current_password = request.data.get('current_password')
+        new_password = request.data.get('new_password')
+
+        if not current_password or not new_password:
+            return Response({'error': 'Both current_password and new_password are required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if not user.check_password(current_password):
+            return Response({'error': 'Current password is incorrect'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save()
+
+        return Response({'message': 'Password changed successfully'}, status=status.HTTP_200_OK)
+
 
 class UserLoginView(APIView):
     def post(self, request):
@@ -94,8 +107,9 @@ class UserLoginView(APIView):
         if user:
             refresh = RefreshToken.for_user(user)
             access_token = refresh.access_token
-            return Response({'access_token': str(access_token), 'user': UserSerializer(user).data})
+            return Response({'access_token': str(access_token), 'refresh_token': str(refresh), 'user': UserSerializer(user).data})
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 
 class UserProfileView(APIView):
@@ -134,9 +148,9 @@ class UserLogoutView(APIView):
         return Response({'error': 'Refresh token is required'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+
 class PromoteToAdminView(APIView):
     permission_classes = [IsAdminUser]  # Only admins can promote users to admin
-
     def put(self, request, user_id):
         try:
             user = Users.objects.get(pk=user_id)
@@ -148,3 +162,11 @@ class PromoteToAdminView(APIView):
 
         serializer = UserSerializer(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+
+
+
+
+
+
