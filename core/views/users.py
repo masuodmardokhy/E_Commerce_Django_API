@@ -104,12 +104,16 @@ class UserLoginView(APIView):
         email = request.data.get('email')
         password = request.data.get('password')
         user = authenticate(email=email, password=password)
-        if user:
-            refresh = RefreshToken.for_user(user)
-            access_token = refresh.access_token
-            return Response({'access_token': str(access_token), 'refresh_token': str(refresh), 'user': UserSerializer(user).data})
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
+        if user:
+            if user.active:
+                refresh = RefreshToken.for_user(user)
+                access_token = refresh.access_token
+                return Response({'access_token': str(access_token), 'refresh_token': str(refresh),
+                                 'user': UserSerializer(user).data})
+            else:
+                return Response({'error': 'This user is inactive'}, status=status.HTTP_401_UNAUTHORIZED)
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 class UserProfileView(APIView):
@@ -164,6 +168,14 @@ class PromoteToAdminView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
+class UserDeleteProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+    def delete(self, request):
+        user = request.user
+        user.active = False
+        user.save()
+
+        return Response({'message': 'Profile has been deactivated and deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 
 

@@ -11,19 +11,7 @@ router.register(r'',CategoryViewSet, basename='category_view_set'),
 
 urlpatterns = [       # url for function base view
     path('', include(router.urls)),
-    # path('', CategoryViewSet.as_view({'get': 'list'}), name='category-list'),  # list filtering sort by and pagination
-    path('tree/', CategoryViewSet.as_view({'GET': 'unique_categories'}), name='unique_categories'),
-    path('delete_all_products/', CategoryViewSet.as_view({'post': 'delete_all_category'}), name='delete_all_category'),
-
-    # path('filter/name/<str:name>/', CategoryViewSet.as_view({'get': 'filter_category_by_name'}), name='filter_category_by_name'),                    #  filter category by name API
-    # path('filter/id/<int:pk>/', CategoryViewSet.as_view({'get': 'filter_category_by_id'}), name='filter_category_by_id'),                            #  filter category by id API
-    # # path('filter/date/', CategoryViewSet.as_view({'get': 'filter_category_by_date'}), name='filter_category_by_date'),                             #  filter category by data API
-    # path('filter/first-created/', CategoryViewSet.as_view({'get': 'filter_category_first_created'}), name='filter_category_first_created'),          # filter category first created API
-    # path('filter/last-created/', CategoryViewSet.as_view({'get': 'filter_category_last_created'}), name='filter_category_last_created'),             # filter category last created API
-    # path('filter/lastToFirst-created/', CategoryViewSet.as_view({'get': 'filter_category_last_to_first_created'}), name='filter_category_last_to_first_created'),      # filter category last to first created API
-    # path('filter/firstToLast-created/', CategoryViewSet.as_view({'get': 'filter_category_first_to_last_created'}), name='filter_category_first_to_last_created'),      # filter category last to first created API
-    # path('search/<str:search_param>', CategoryViewSet.as_view({'get': 'search_category_by_name'}), name='search_category_by_name'),                  # search category by name API
-    #
+    path('delete_all_category/', CategoryViewSet.as_view({'post': 'delete_all_category'}), name='delete_all_category'),
 
 ]
 urlpatterns += router.urls

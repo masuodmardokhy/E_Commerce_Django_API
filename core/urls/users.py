@@ -7,14 +7,15 @@ from core.views.users import *
 app_name = "Users"
 
 urlpatterns = [
-    path('create/', UserRegistrationView.as_view(), name='user-register'),
+    path('create', UserRegistrationView.as_view(), name='user-register'),
     path('', UserListView.as_view(), name='user-list'),
-    path('update/', UserProfileUpdateView.as_view(), name='user-profile-update'),
-    path('change_password/', UserChangePasswordView.as_view(), name='change_password'),
-    path('login/', UserLoginView.as_view(), name='user-login'),
-    path('profile/', UserProfileView.as_view(), name='user-profile'),
-    path('<int:user_id>/', UserDetailView.as_view(), name='user-detail'),
-    path('logout/', UserLogoutView.as_view(), name='user-logout'),
-    path('promote-to-admin/<int:user_id>/', PromoteToAdminView.as_view(), name='promote-to-admin'),
+    path('update', UserProfileUpdateView.as_view(), name='user-profile-update'),
+    path('change_password', UserChangePasswordView.as_view(), name='change_password'),
+    path('login', UserLoginView.as_view(), name='user-login'),
+    path('profile', UserProfileView.as_view(), name='user-profile'),
+    path('<int:user_id>', UserDetailView.as_view(), name='user-detail'),
+    path('logout', UserLogoutView.as_view(), name='user-logout'),
+    path('promote-to-admin/<int:user_id>', PromoteToAdminView.as_view(), name='promote-to-admin'),
+    path('delete_profile', UserDeleteProfileView.as_view(), name='user-delete-profile'),
 
 ]
