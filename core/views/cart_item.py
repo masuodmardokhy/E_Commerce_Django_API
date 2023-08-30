@@ -56,3 +56,19 @@ class Cart_ItemViewSet(viewsets.ModelViewSet):
             return Response("Cart item created successfully", status=status.HTTP_201_CREATED)
         except Users.DoesNotExist:
             return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
+
+
+    def partial_update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        amount = request.data.get('amount')
+        if amount is not None:
+            new_amount = int(amount)
+
+            #Checking that the new quantity should not be more than the stock of the product
+            if new_amount > instance.product.amount:
+                return Response({'message': 'Not enough stock available'}, status=status.HTTP_400_BAD_REQUEST)
+
+            instance.amount = new_amount
+            instance.save()
+            return Response({'message': 'Amount updated successfully'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Invalid data'}, status=status.HTTP_400_BAD_REQUEST)
