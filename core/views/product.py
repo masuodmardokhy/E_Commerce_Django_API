@@ -36,61 +36,6 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 
-    @action(detail=False, methods=['delete'])
-    def delete_all_products(self, request):
-        deleted_count, _ = Product.objects.all().delete()
-        return Response({'message': f'{deleted_count} products were deleted successfully.'})
-
-
-    @action(detail=True, methods=['post'], url_path='add-to-cart')
-    def add_to_cart(self, request, pk=None, user_id=None):
-        product = self.get_object()
-        amount = request.data.get('amount')
-        name = product.name
-        total_price = product.calculate_total_price
-
-        try:
-            user = Users.objects.get(id=user_id)
-            # if isinstance(user,AnonymousUser):
-            #     user=None
-            # if user.is_anonymous:
-            #     return Response("Unauthorized", status=status.HTTP_401_UNAUTHORIZED)
-            cart_item = Cart_Item.objects.get(user=user, product=product)
-            cart_item.amount += amount
-            cart_item.save()
-
-        except Users.DoesNotExist:
-            return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
-
-        except Cart_Item.DoesNotExist:
-            # Create a new cart item for the product
-            cart_item = Cart_Item.objects.create(user=user, product=product, amount=amount, name=name, price=total_price)
-
-        return Response("Added to cart successfully", status=status.HTTP_200_OK)
-
-
-    @action(detail=True, methods=['post'], url_path='add-to-wishlist')
-    def add_to_wishlist(self, request, pk=None, user_id=None):
-        product = self.get_object()
-
-        try:
-            user = Users.objects.get(id=user_id)
-
-            # Checking if the product is in the user's wish list or not
-            if Wish_List.objects.filter(users=user, product=product).exists():
-                return Response("The product is already in the wishlist.", status=status.HTTP_409_CONFLICT)
-
-            # Add product to wish list
-            wishlist_item = Wish_List.objects.create(users=user, product=product)
-            serializer = Wish_ListSerializer(wishlist_item)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        except Users.DoesNotExist:
-            return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
-
-        # except Exception as e:
-        #     return Response("An error occurred.", status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
@@ -122,7 +67,7 @@ class ProductViewSet(viewsets.ModelViewSet):
         if product_serializer.is_valid():
             product = product_serializer.save()
 
-            # اضافه کردن تصاویر به محصول
+            # add image to product
             images = request.FILES.getlist('images')
             for image in images:
                 product_image = ProductImage.objects.create(product=product, image=image)
@@ -144,159 +89,86 @@ class ProductViewSet(viewsets.ModelViewSet):
         try:
             product = self.get_object()
             product.delete()
-            return Response("Deleted product with ID: {pk}", status=status.HTTP_204_NO_CONTENT)
+            return Response(f"Deleted product", status=status.HTTP_204_NO_CONTENT)
         except Product.DoesNotExist:
             return Response("product not found", status=status.HTTP_404_NOT_FOUND)
 
 
+    @action(detail=False, methods=['delete'])
+    def delete_all_products(self, request):
+        deleted_count, _ = Product.objects.all().delete()
+        return Response({'message': f'{deleted_count} products were deleted successfully.'})
+
+
+    @action(detail=True, methods=['post'], url_path='add-to-cart')
+    def add_to_cart(self, request, pk=None, user_id=None):
+        product = self.get_object()
+        amount = int(request.data.get('amount'))  # تبدیل amount به عدد
+        name = product.name
+        total_price = product.calculate_total_price
+
+        try:
+            user = Users.objects.get(id=user_id)
+
+            # Get the number of product from the database
+            product_stock = product.amount
+
+            if amount > product_stock:
+                return Response("Not enough stock available", status=status.HTTP_400_BAD_REQUEST)
+
+            cart_item, created = Cart_Item.objects.get_or_create(
+                user=user, product=product, defaults={'amount': amount, 'name': name, 'price': total_price}
+            )
+
+            if not created:
+                cart_item.amount += amount
+                cart_item.save()
+
+            return Response("Added to cart successfully", status=status.HTTP_200_OK)
+
+        except Users.DoesNotExist:
+            return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
 
 
 
-# @action(detail=False, methods=['get'])
-    # def sort_filter_form(self, request):
-    #     form = Sort_FilterForm()
-    #     return Response({'form': form.as_ul()})
+    # @action(detail=True, methods=['post'], url_path='add-to-cart')
+    # def add_to_cart(self, request, pk=None, user_id=None):
+    #     product = self.get_object()
+    #     amount = request.data.get('amount')
+    #     name = product.name
+    #     total_price = product.calculate_total_price
     #
-    #
-    # @action(detail=False, methods=['get'])
-    # def sort_filter(self, request):
-    #     form = Sort_FilterForm(request.POST)
-    #     if form.is_valid():
-    #         sort_by = form.cleaned_data['sort_by']
-    #         queryset = self.get_queryset()
-    #         if sort_by == 'name':
-    #             queryset = queryset.order_by('name')
-    #         elif sort_by == 'lowest_price':
-    #             queryset = queryset.order_by('price')
-    #         elif sort_by == 'highest_price':
-    #             queryset = queryset.order_by('-price')
-    #         else:
-    #             # Handle invalid sort option
-    #             return Response({'error': 'Invalid sort option'}, status=status.HTTP_400_BAD_REQUEST)
-    #         page = self.paginate_queryset(queryset)
-    #         if page is not None:
-    #             serializer = self.get_serializer(page, many=True)
-    #             return self.get_paginated_response(serializer.data)
-    #         serializer = self.get_serializer(queryset, many=True)
-    #         return Response(serializer.data)
-    #     else:
-    #         # Handle form validation errors
-    #         return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
-    #
-
-
-
-
-#     @action(detail=True, methods=['post'])
-#     def list_filter_sort(self, request, *args, **kwargs):
-#         # Create and handle the form
-#         form = SortForm(request.GET)
-#         if form.is_valid():
-#             sort_by = form.cleaned_data['sort_by']
-#             queryset = Product.objects.all()
-#             if sort_by == 'name':
-#                 queryset = queryset.order_by('name')
-#             elif sort_by == 'lowest_price':
-#                 queryset = queryset.order_by('price')
-#             elif sort_by == 'highest_price':
-#                 queryset = queryset.order_by('-price')
-#             else:
-#                 # Handle invalid sort option
-#                 return Response({'error': 'Invalid sort option'}, status=status.HTTP_400_BAD_REQUEST)
-#         else:
-#             # Handle form validation errors
-#             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
-#
-#         # Apply additional filters
-#         name = request.query_params.get('name')
-#         if name:
-#             queryset = queryset.filter(name__icontains=name)
-#
-#         price = request.query_params.get('price')
-#         if price:
-#             queryset = queryset.filter(price=price)
-#
-#         # Perform pagination
-#         paginator = self.pagination_class()
-#         page = paginator.paginate_queryset(queryset, request)
-#         serializer = self.get_serializer(page, many=True)
-#         return paginator.get_paginated_response(serializer.data)
-#
-#
-#
-
-    #
-    #
-    # @action(detail=True, methods=['get'])
-    # def filter_product_by_name(self, request, name=None):
     #     try:
-    #         prod = Product.objects.filter(name=name)
-    #         serializer = ProductSerializer(prod, many=True)
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #     except Product.DoesNotExist:
-    #         return Response("category not found", status=status.HTTP_404_NOT_FOUND)
+    #         user = Users.objects.get(id=user_id)
+    #         cart_item = Cart_Item.objects.get(user=user, product=product)
+    #         cart_item.amount += int(amount)
+    #         cart_item.save()
     #
+    #     except Users.DoesNotExist:
+    #         return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
     #
-    # @action(detail=True, methods=['get'])
-    # def filter_product_by_id(self, request, pk=None):
-    #     try:
-    #         prod = Product.objects.get(id=pk)
-    #         serializer = ProductSerializer(prod)
-    #         return Response(serializer.data, status=status.HTTP_200_OK)
-    #     except Product.DoesNotExist:
-    #         return Response("category not found", status=status.HTTP_404_NOT_FOUND)
+    #     except Cart_Item.DoesNotExist:
+    #         # Create a new cart item for the product
+    #         cart_item = Cart_Item.objects.create(user=user, product=product, amount=amount, name=name, price=total_price)
     #
-    #
-    # @action(detail=False, methods=['get'])
-    # def filter_product_by_date(self, request):
-    #     start_date = request.query_params.get('start_date')
-    #     end_date = request.query_params.get('end_date')
-    #     categories = self.get_queryset().filter(date__range=[start_date, end_date])
-    #     serializer = self.get_serializer(categories, many=True)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-    #
-    #
-    # @action(detail=False, methods=['get'])
-    # def filter_product_first_created(self, request):    # aggregate is a method for operation sum,count,avg, min,max
-    #     earliest_created = self.get_queryset().aggregate(earliest_created=Min('create')).get('earliest_created')
-    #     categories = self.get_queryset().filter(create=earliest_created)
-    #     serializer = self.get_serializer(categories, many=True)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-    #
-    #
-    # @action(detail=False, methods=['get'])
-    # def filter_product_last_created(self, request):
-    #     latest_created = self.get_queryset().aggregate(latest_created=Max('create')).get('latest_created')
-    #     categories = self.get_queryset().filter(create=latest_created).order_by('create')
-    #     serializer = self.get_serializer(categories, many=True)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-    #
-    #
-    # @action(detail=False, methods=['get'])
-    # def filter_product_last_to_first_created(self, request):
-    #     categories = self.get_queryset().order_by('-create')
-    #     serializer = self.get_serializer(categories, many=True)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-    #
-    #
-    # @action(detail=False, methods=['get'])
-    # def filter_product_first_to_last_created(self, request):
-    #     categories = self.get_queryset().order_by('create')
-    #     serializer = self.get_serializer(categories, many=True)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-    #
-    #
-    # @action(detail=False, methods=['get'])
-    # def search_product_by_name(self, request, search_param):
-    #     categories = self.get_queryset().filter(name__icontains=search_param)
-    #     serializer = self.get_serializer(categories, many=True)
-    #     return Response(serializer.data, status=status.HTTP_200_OK)
-    #
-    #
-    #
-    #
+    #     return Response("Added to cart successfully", status=status.HTTP_200_OK)
     #
 
+    @action(detail=True, methods=['post'], url_path='add-to-wishlist')
+    def add_to_wishlist(self, request, pk=None, user_id=None):
+        product = self.get_object()
+        try:
+            user = Users.objects.get(id=user_id)
+            # Checking if the product is in the user's wish list or not
+            if Wish_List.objects.filter(users=user, product=product).exists():
+                return Response("The product is already in the wishlist.", status=status.HTTP_409_CONFLICT)
+            # Add product to wish list
+            wishlist_item = Wish_List.objects.create(users=user, product=product)
+            serializer = Wish_ListSerializer(wishlist_item)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        except Users.DoesNotExist:
+            return Response("Invalid user ID", status=status.HTTP_400_BAD_REQUEST)
 
 
 
