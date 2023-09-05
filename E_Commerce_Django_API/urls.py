@@ -16,6 +16,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from rest_framework import permissions
 from rest_framework.authtoken import views
 from rest_framework.authtoken.views import obtain_auth_token
 from django.conf import settings
@@ -23,12 +24,15 @@ from django.conf.urls.static import static
 # from core import admin
 from core.admin import *
 from rest_framework_simplejwt import views as jwt_views
-
-
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
 urlpatterns = [
+
     path('admin/', admin.site.urls),
+    path('schema/', SpectacularAPIView.as_view(), name= "schema"),
+    path('schema/docs/', SpectacularSwaggerView.as_view(url_name='schema')),
+
     path('category/', include('core.urls.category')),
     path('cart_item/', include('core.urls.cart_item')),
     path('delivery/', include('core.urls.delivery')),

@@ -42,6 +42,8 @@ INSTALLED_APPS = [
 
     'core',
     'rest_framework',
+    'drf_spectacular',
+    # 'drf_yasg',  # for swagger
     # 'rest_framework.authtoken'
     'rest_framework_simplejwt',
 ]
@@ -100,23 +102,30 @@ DATABASES = {
 
 
 
-
 REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema', # for swagger
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         # 'rest_framework.authentication.SessionAuthentication',
         # 'rest_framework.authentication.BasicAuthentication',
         # 'rest_framework.authentication.TokenAuthentication',
-
     ],
         'DEFAULT_PERMISSION_CLASSES': [
            'rest_framework.permissions.AllowAny',
 ]
 }
 
+SPECTACULAR_SETTING = {
+    "TITLE": " E_Commrce_Django_API"
+}
+
+
+
+
+
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=120),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
     'SLIDING_TOKEN_LIFETIME': timedelta(days=30),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=7),
