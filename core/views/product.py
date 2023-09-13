@@ -36,7 +36,6 @@ class ProductViewSet(viewsets.ModelViewSet):
 
 
 
-
     def list(self, request):
         queryset = self.filter_queryset(self.get_queryset())
 

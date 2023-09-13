@@ -43,11 +43,9 @@ INSTALLED_APPS = [
     'core',
     'rest_framework',
     'drf_spectacular',
-    # 'drf_yasg',  # for swagger
-    # 'rest_framework.authtoken'
     'rest_framework_simplejwt',
 ]
-# AUTH_USER_MODEL = "core.models.user.Users"
+
 AUTH_USER_MODEL = "core.users"
 
 

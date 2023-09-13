@@ -37,8 +37,7 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer = self.serializer_class(comments, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    # @authentication_classes([JWTAuthentication])  # Authenticate with JWT
-    # @permission_classes([AllowAny,])  # Allow access for logged in users
+
     def create(self, request, *args, **kwargs):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():

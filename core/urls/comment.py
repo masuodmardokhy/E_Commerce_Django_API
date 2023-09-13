@@ -14,7 +14,7 @@ urlpatterns = [   # url for function base view
    path('token/', jwt_views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
    path('token/refresh/', jwt_views.TokenRefreshView.as_view(), name='token_refresh'),
 
-   path('Comment-By-product/<int:product_id>/', CommentViewSet.as_view({'get': 'comments_by_product'}), name='comments_by_product'),
-   path('Comment-By-user/<int:user_id>/', CommentViewSet.as_view({'get': 'comments_by_user'}), name='comments_by_user'),
+   path('Comment_By_product/<int:product_id>/', CommentViewSet.as_view({'get': 'comments_by_product'}), name='comments_by_product'),
+   path('Comment_By_user/<int:user_id>/', CommentViewSet.as_view({'get': 'comments_by_user'}), name='comments_by_user'),
 
 ]

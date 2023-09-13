@@ -1,10 +1,13 @@
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
-from rest_framework.decorators import action
+from rest_framework.decorators import action, authentication_classes, permission_classes
 from rest_framework import status                       # for show messages
 from rest_framework import viewsets , permissions       # viewsets for class base view
 from rest_framework.filters import SearchFilter
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
 from core.models.rate import *
 from core.serializers.rate import *
 from django.shortcuts import get_object_or_404
@@ -16,6 +19,9 @@ class MyPagination(PageNumberPagination):
     max_page_size = 5
 
 
+
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticatedOrReadOnly])
 class RateViewSet(viewsets.ModelViewSet):
     queryset = Rate.objects.all()
     serializer_class = RateSerializer

@@ -16,22 +16,27 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path,include
+from drf_spectacular import openapi
 from rest_framework import permissions
 from rest_framework.authtoken import views
 from rest_framework.authtoken.views import obtain_auth_token
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework.schemas import get_schema_view
+
 # from core import admin
 from core.admin import *
 from rest_framework_simplejwt import views as jwt_views
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 
+
+
 urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('schema/', SpectacularAPIView.as_view(), name= "schema"),
-    path('schema/docs/', SpectacularSwaggerView.as_view(url_name='schema')),
+    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema')),
 
     path('category/', include('core.urls.category')),
     path('cart_item/', include('core.urls.cart_item')),
@@ -39,7 +44,6 @@ urlpatterns = [
     path('order/', include('core.urls.order')),
     path('product/', include('core.urls.product')),
     path('shopping_cart/', include('core.urls.shopping_cart')),
-    # path('sub_category/', include('core.urls.sub_category')),
     path('users/', include('core.urls.users')),
     path('wish_list/', include('core.urls.wish_list')),
     path('rate/', include('core.urls.rate')),

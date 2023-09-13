@@ -11,12 +11,17 @@ class Shopping_CartSerializer(serializers.ModelSerializer):
     def get_total_price_with_send_price(self, obj):
         return obj['total_price'] + obj['send_price']
 
+class CartItemUpdateSerializer(serializers.Serializer):
+    product_id = serializers.IntegerField()
+    new_amount = serializers.IntegerField()
+
 
 class Shopping_CartListSerializer(serializers.Serializer):
     cart_items = Cart_ItemSerializer(many=True,)
     total_price = serializers.SerializerMethodField()
     total_amount_item = serializers.SerializerMethodField(method_name='get_total_amount_item')
     total_amount_product = serializers.SerializerMethodField(method_name='get_total_amount_product')
+    cart_id = serializers.IntegerField(source='instance.id', read_only=True)  # اضافه کردن فیلد شناسه سبد خرید
 
 
     def get_total_price(self, obj):                                                       # obj['cart_items']: A list of shopping cart items
@@ -30,8 +35,6 @@ class Shopping_CartListSerializer(serializers.Serializer):
     def get_total_amount_item(self, obj):
         cart_items_data = self.fields['cart_items'].to_representation(obj['cart_items'])
         return len(cart_items_data)
-
-
 
 
 

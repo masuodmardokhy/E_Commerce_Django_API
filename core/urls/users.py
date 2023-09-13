@@ -7,6 +7,8 @@ from core.views.users import *
 app_name = "Users"
 
 urlpatterns = [
+
+
     path('create', UserRegistrationView.as_view(), name='user-register'),
     path('', UserListView.as_view(), name='user-list'),
     path('update', UserProfileUpdateView.as_view(), name='user-profile-update'),
