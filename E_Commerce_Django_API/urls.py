@@ -27,7 +27,7 @@ from rest_framework.schemas import get_schema_view
 # from core import admin
 from core.admin import *
 from rest_framework_simplejwt import views as jwt_views
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView,SpectacularRedocView
 
 
 
@@ -36,7 +36,8 @@ urlpatterns = [
 
     path('admin/', admin.site.urls),
     path('schema/', SpectacularAPIView.as_view(), name= "schema"),
-    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema')),
+    path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 
     path('category/', include('core.urls.category')),
     path('cart_item/', include('core.urls.cart_item')),

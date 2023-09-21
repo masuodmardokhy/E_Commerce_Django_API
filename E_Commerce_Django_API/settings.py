@@ -42,9 +42,22 @@ INSTALLED_APPS = [
 
     'core',
     'rest_framework',
-    'drf_spectacular',
+    'drf_spectacular',  # for set swagger
     'rest_framework_simplejwt',
 ]
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'E_Commerce_Django_API',
+    'DESCRIPTION': 'This is a E_Commerce official API documentation.',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'CONTACT': {
+        # 'name': 'Address GIT',
+        # 'url': 'https://github.com/masuodmardokhy',
+        'email': 'masuod.mardokhy@gmail.com'
+    }
+}
+
 
 AUTH_USER_MODEL = "core.users"
 
@@ -113,9 +126,6 @@ REST_FRAMEWORK = {
 ]
 }
 
-SPECTACULAR_SETTING = {
-    "TITLE": " E_Commrce_Django_API"
-}
 
 
 
